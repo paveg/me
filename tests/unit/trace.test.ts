@@ -51,3 +51,39 @@ test('目盛り', () => {
   expect(axisTicks(2)).toEqual([2015, 2017, 2019, 2021, 2023, 2025]);
   expect(axisTicks(4)).toEqual([2015, 2019, 2023]);
 });
+
+test('ビルド月はYYYY-MM形式でdefineから埋め込まれる', () => {
+  expect(__BUILD_MONTH__).toMatch(/^\d{4}-(0[1-9]|1[0-2])$/);
+});
+
+test('会社の開始が書式違反ならbuildTraceRowsはエラーにする', () => {
+  const profile = structuredClone(getContent('ja').profile);
+  profile.workExperience[1]!.period.start = '2019/07';
+  expect(() => buildTraceRows(profile, siteCopy.ja.traceLabels, '2026-11')).toThrow(
+    'Invalid period: 2019/07',
+  );
+});
+
+test('役割の開始が書式違反ならbuildTraceRowsはエラーにする', () => {
+  const profile = structuredClone(getContent('ja').profile);
+  profile.workExperience[0]!.roles![0]!.period.start = '2019/07';
+  expect(() => buildTraceRows(profile, siteCopy.ja.traceLabels, '2026-11')).toThrow(
+    'Invalid period: 2019/07',
+  );
+});
+
+test('会社のラベルがなければ、そのキーを示してエラーにする', () => {
+  const profile = getContent('ja').profile;
+  const { ACALL株式会社: _removed, ...labels } = siteCopy.ja.traceLabels;
+  expect(() => buildTraceRows(profile, labels, '2026-11')).toThrow(
+    'Missing trace label: ACALL株式会社',
+  );
+});
+
+test('役割のラベルがなければ、そのキーを示してエラーにする', () => {
+  const profile = getContent('ja').profile;
+  const { データ集約機能: _removed, ...labels } = siteCopy.ja.traceLabels;
+  expect(() => buildTraceRows(profile, labels, '2026-11')).toThrow(
+    'Missing trace label: データ集約機能',
+  );
+});
