@@ -1,5 +1,8 @@
 import { expect, test, type Page } from '@playwright/test';
 
+// クライアントのモジュールはload後に動き、インラインのスタイルを同期的に書き込む
+const CLIENT_MODULE_SETTLE_MS = 200;
+
 test('JS無効でも全節の本文とバーが見える', async ({ browser }) => {
   const page = await (await browser.newContext({ javaScriptEnabled: false })).newPage();
   await page.goto('/');
@@ -30,8 +33,7 @@ test('reduced-motionではバーが最初から最終状態', async ({ browser }
   await page.goto('/');
   expect((await readBarTransforms(page)).every(isIdentity)).toBe(true);
 
-  await page.waitForLoadState('load');
-  await page.waitForTimeout(200);
+  await page.waitForTimeout(CLIENT_MODULE_SETTLE_MS);
   expect(await countAnimatedInlineStyles(page)).toBe(0);
 });
 
