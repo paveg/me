@@ -4,9 +4,9 @@
 
 **Goal:** 日英2ページのポートフォリオサイトを、ビルド時にprerenderした静的HTMLとしてCloudflare Workers（`me.funailog.com`）に公開する。
 
-**Architecture:** Vite + React 19で、クライアント用とSSR用の2つのビルドを作る。`scripts/prerender.ts`がSSRビルドの`render(locale)`を呼んで`dist/client/index.html`と`dist/client/en/index.html`を書き出し、クライアントは`hydrateRoot`でハイドレーションする。経歴データはYAMLのまま持ち、`@rollup/plugin-yaml`でビルド時にJSモジュールへ変換する。動きはanime.js v4の`createScope`を`useEffect`内で使う。
+**Architecture:** Vite + React 19で、クライアント用とSSR用の2つのビルドを作る。`scripts/prerender.ts`がSSRビルドの`render(locale)`を呼んで`dist/client/index.html`と`dist/client/en/index.html`を書き出す。ブラウザではハイドレーションしない。クライアントのビルドの入口`src/entry-client.ts`は、prerender済みのDOMに対してanime.jsのアニメーションを動かすだけで、Reactを含まない。続けて`scripts/subset-fonts.ts`が、出来上がったHTMLの文字だけを含むLINE Seed JPのwoff2を作る。経歴データはYAMLのまま持ち、`@rollup/plugin-yaml`でビルド時にJSモジュールへ変換する。
 
-**Tech Stack:** pnpm、Vite 8.3.8、React 19.3.1、TypeScript 7.0.2、anime.js 4.5.0、@rollup/plugin-yaml 5.0.1、Vitest 5.1.0、Playwright 1.65.1 + @axe-core/playwright 4.14.0、Lighthouse 13.6.0、oxlint 1.94.0、oxfmt 0.79.0、wrangler 4.164.0、tsx 4.23.15
+**Tech Stack:** pnpm、Vite 8.3.8、React 19.3.1、TypeScript 7.0.2、anime.js 4.5.0、@rollup/plugin-yaml 5.0.1、Vitest 5.1.0、Playwright 1.65.1 + @axe-core/playwright 4.14.0、Lighthouse 13.6.0、oxlint 1.94.0、oxfmt 0.79.0、wrangler 4.164.0、tsx 4.23.15、subset-font（Task 7で`pnpm view subset-font version`の値に固定する）
 
 **Spec:** `docs/superpowers/specs/2026-11-18-portfolio-site-design.md`（モック: `docs/superpowers/specs/mockups/mockup.html`）
 
@@ -18,7 +18,9 @@
 - 日本語の文面では半角英数字の前後に空白を入れない。「PjM」は「プロジェクトマネージャー」。「フルスタック」は使わない
 - 価値提案（承認済み、文言を変えない）: ja「プロダクトの設計から、それを動かす基盤まで。成長するSaaSを10年以上、作っては作り直してきました。」／ en "From product design to the platform it runs on. Over a decade of building, and rebuilding, a growing SaaS."
 - 色トークン（ライト）: paper `#FBFCFD`、ink `#1C2733`、muted `#5B6B7C`、rule `#DCE2E9`、span `#2E6BD6`、span-soft `#7090C2`、open `#B07200`。ダーク: paper `#14212F`、ink `#E6ECF2`、muted `#9AABBD`、rule `#2A3B4F`、span `#6FA0F2`、span-soft `#5A7AAE`、open `#F2B544`
-- 書体はIBM Plex Sans JP（400/500/600）。年や期間は`font-variant-numeric: tabular-nums`で、等幅フォントは使わない
+- 書体はLINE Seed JPの400と700だけ（名前、見出し、会社名、ボタンが700、ほかは400）。この書体に`tnum`はないので、`font-variant-numeric: tabular-nums`は書かない。等幅フォントは使わない
+- コードはすべてTypeScript（`scripts/`も含む）。lintはoxlint、フォーマットはoxfmt。Prettierは入れない
+- ブラウザに送るJSにReactを含めない（ハイドレーションしない）
 - 自動で動くのは読み込み時のトレース描画1回だけ。名前と価値提案は動かさない。reduced-motionでは全要素を最終状態で表示する
 - 出現アニメのために要素を隠す処理はJSでだけ行い、CSSとprerender済みHTMLに隠す指定を書かない
 - careerリポジトリの情報（応募状況・年収など）は一切載せない
@@ -27,19 +29,21 @@
 
 ## スタックPRでの進め方
 
-- GitHubのリポジトリは`paveg/me`（公開、gh-infraで作成。マージはsquashのみ）。ローカルの`portfolio/`に`origin`として登録する
-- 1タスク＝1ブランチ＝1PRとして、`gh stack`で依存順に積む。ブランチ名は`v1/scaffold`、`v1/data`、`v1/trace`、`v1/sections`、`v1/head`、`v1/animation`、`v1/quality`、`v1/deploy`
+- GitHubのリポジトリは`paveg/me`（公開、gh-infraで作成。マージはsquashのみ）
+- 1タスク＝1ブランチ＝1PRとして、`gh stack`で依存順に積む。ブランチ名は`v1/scaffold`、`v1/data`、`v1/trace`、`v1/sections`、`v1/head`、`v1/animation`、`v1/fonts`、`v1/quality`、`v1/deploy`
 - 各タスクは、メインセッションが`gh stack add <ブランチ名>`でブランチを作り、implementerサブエージェントがworktreeで実装し、終わったらメインセッションがそのブランチへfast-forwardで取り込む。下の層を直す必要が出たら、その層のブランチで直して`gh stack rebase --upstack`する
+- 作業ディレクトリは`~/repos/github.com/paveg/me`。`origin`は`https://github.com/paveg/me.git`で、`main`はpush済み（gh-infraのrulesetで、強制pushと削除を禁止している）
 - `site.ts`の`sourceUrl`は`https://github.com/paveg/me`
 - push・PR作成・マージは、本人の確認を取ってから行う
 
 ## Review Focus
 
-- **ハイドレーションの不一致**: 「現在」の月をクライアントで`new Date()`から取ると、prerenderしたHTMLと食い違う。ビルド時の月をViteの`define`で埋め込み、サーバーとクライアントで同じ値を使う（Task 3のテストで固定する）
+- **フォントの欠字**: 文面に、元のフォントにない文字（絵文字や珍しい漢字）が入ると、その文字だけ別の書体で表示される。`scripts/subset-fonts.ts`がビルドを失敗させる（Task 7のテストで固定する）
+- **「現在」の月**: トレースの現職の終端は、ビルド時の月をViteの`define`で埋め込んで決める。ブラウザで`new Date()`を使って計算し直さない（Task 3のテストで固定する）
 - **英語ページのリンク**: `/en`はWorkersで`/en/`へ307転送される。言語切替や内部リンクは最初から`/en/`と`/`を指すこと（Task 5のテストで固定する）
 - **期間データの書式違反**: profile.ymlの`period.start`が`YYYY-MM`でないと、バーの位置が`NaN`になって静かに崩れる。ビルドを失敗させる（Task 3のテストで固定する）
-- **JS無効や読み込み失敗時の表示**: anime.jsのCDN障害やJSエラーでも、本文とバーはprerender済みHTMLだけで読める状態にする（Task 6のe2eで固定する）
-- **キーボード操作**: トレースの各行は`<summary>`なので、Tab移動とEnter/Spaceで開閉でき、フォーカス表示が見えること（Task 7のe2eで固定する）
+- **JS無効や読み込み失敗時の表示**: JSが無効だったり、JSの読み込みに失敗したりしても、本文とバーはprerender済みHTMLだけで読める状態にする（Task 6のe2eで固定する）
+- **キーボード操作**: トレースの各行は`<summary>`なので、Tab移動とEnter/Spaceで開閉でき、フォーカス表示が見えること（Task 8のe2eで固定する）
 
 ---
 
@@ -51,7 +55,10 @@ playwright.config.ts, .oxlintrc.json, wrangler.json, index.html
 public/profile.jpg                 プロフィールアイコン（192×192に縮小）
 public/404.html                    静的な404ページ
 scripts/prerender.ts               SSRビルドを呼んでHTMLを書き出す
-src/entry-client.tsx               hydrateRoot
+scripts/subset-fonts.ts            出来上がったHTMLの文字だけのwoff2を作る（欠字ならビルドを失敗させる）
+scripts/lib/cmap.ts                TTFのcmapを読み、文字がフォントにあるかを判定する（純関数）
+fonts/src/                         LINESeedJP-Regular.ttf、LINESeedJP-Bold.ttf、OFL.txt
+src/entry-client.ts                startTraceAnimationを呼ぶだけ（Reactを含まない）
 src/entry-server.tsx               render(locale)
 src/App.tsx                        ページ全体の組み立て
 src/head.ts                        buildHead(locale): <title>・meta・OGP・hreflang
@@ -63,8 +70,8 @@ src/data/site.ts                   日英の文面（価値提案・頼めるこ
 src/data/index.ts                  getContent(locale)
 src/lib/trace.ts                   トレースの位置計算と行の組み立て（純関数）
 src/components/{Hero,Trace,Offers,Work,Writing,Contact,Footer,IconSprite}.tsx
-src/hooks/useTraceAnimation.ts     anime.jsによる描画と開閉アニメーション
-tests/unit/*.test.ts(x)            Vitest
+src/animation/trace.ts             anime.jsによる描画と開閉アニメーション（prerender済みのDOMに対して動く）
+tests/unit/*.test.ts(x)            Vitest（budget.test.tsはビルド結果の大きさを測る）
 tests/e2e/site.spec.ts             Playwright
 ```
 
@@ -73,13 +80,13 @@ tests/e2e/site.spec.ts             Playwright
 ### Task 1: 土台とprerenderのパイプライン
 
 **Files:**
-- Create: `package.json`, `tsconfig.json`, `vite.config.ts`, `vitest.config.ts`, `.oxlintrc.json`, `wrangler.json`, `index.html`, `src/entry-client.tsx`, `src/entry-server.tsx`, `src/App.tsx`, `scripts/prerender.ts`, `public/404.html`
+- Create: `package.json`, `tsconfig.json`, `vite.config.ts`, `vitest.config.ts`, `.oxlintrc.json`, `wrangler.json`, `index.html`, `src/entry-client.ts`, `src/entry-server.tsx`, `src/App.tsx`, `scripts/prerender.ts`, `public/404.html`
 - Test: `tests/unit/build-output.test.ts`
 
 **Interfaces:**
 - Produces: `type Locale = 'ja' | 'en'`（`src/entry-server.tsx`からexport）、`render(locale: Locale): { html: string; head: string }`。`index.html`は`<html lang="%LANG%">`、`<!--app-head-->`、`<div id="root"><!--app-html--></div>`の3つのプレースホルダを持つ
 - `package.json`のscripts: `dev`（vite）、`build`（`vite build --outDir dist/client && vite build --ssr src/entry-server.tsx --outDir dist/server && tsx scripts/prerender.ts`）、`preview`（`wrangler dev`）、`lint`（`oxlint`）、`fmt`（`oxfmt`）、`fmt:check`（`oxfmt --check`）、`typecheck`（`tsc --noEmit`）、`test`（`vitest run`）、`test:e2e`（`playwright test`）
-- `wrangler.json`: `name: "portfolio"`、`compatibility_date: "2026-11-01"`、`assets: { directory: "./dist/client", not_found_handling: "404-page" }`。`routes`はTask 8で足す
+- `wrangler.json`: `name: "portfolio"`、`compatibility_date: "2026-11-01"`、`assets: { directory: "./dist/client", not_found_handling: "404-page" }`。`routes`はTask 9で足す
 - `.oxlintrc.json`: pluginsに`react`、`jsx-a11y`、`typescript`を有効にする
 
 - [ ] **Step 1: 依存を入れて設定ファイルを置く**（Tech Stackのバージョンを固定する。`App`は`<main><h1>Ryota Ikezawa</h1></main>`だけ）
@@ -103,7 +110,7 @@ test('404ページが出力されている', () => {
 ```
 
 - [ ] **Step 3: 失敗を確認する** Run: `pnpm vitest run tests/unit/build-output.test.ts` Expected: FAIL（ENOENT）
-- [ ] **Step 4: `scripts/prerender.ts`を実装する** `dist/client/index.html`をテンプレートとして読み、`dist/server/entry-server.js`の`render`を`ja`と`en`で呼んでプレースホルダを置換し、`dist/client/index.html`と`dist/client/en/index.html`に書き出す。`entry-client.tsx`は`document.documentElement.lang`からlocaleを決めて`hydrateRoot`する
+- [ ] **Step 4: `scripts/prerender.ts`を実装する** `dist/client/index.html`をテンプレートとして読み、`dist/server/entry-server.js`の`render`を`ja`と`en`で呼んでプレースホルダを置換し、`dist/client/index.html`と`dist/client/en/index.html`に書き出す。`entry-client.ts`はこの時点では空のモジュールにする（Task 6でアニメーションを呼ぶ）。`react`と`react-dom`をimportしない
 - [ ] **Step 5: 通ることを確認する** Run: `pnpm build && pnpm vitest run tests/unit/build-output.test.ts` Expected: 3 passed。あわせて`pnpm lint && pnpm typecheck && pnpm fmt:check`がエラーなし
 - [ ] **Step 6: コミット** `git commit -m "chore: Vite + Reactのprerender土台を作る"`
 
@@ -217,12 +224,12 @@ test('目盛り', () => {
 
 **Files:**
 - Create: `src/components/{Hero,Trace,Offers,Work,Writing,Contact,Footer,IconSprite}.tsx`, `src/styles.css`
-- Modify: `src/App.tsx`, `src/entry-client.tsx`（`import './styles.css'`）
+- Modify: `src/App.tsx`, `src/entry-client.ts`（`import './styles.css'`）
 - Test: `tests/unit/render.test.tsx`
 
 **Interfaces:**
 - Consumes: `getContent`（Task 2）、`buildTraceRows`・`formatPeriod`・`axisTicks`（Task 3）
-- Produces: `App({ locale }: { locale: Locale })`。トレースの各行は`<details class="trace-row {kind}">`、バーは`<span class="bar" style="left:..%;width:..%">`、開いたスパンの終端は`<span class="open-end">`。Task 6はこのclass名を使う
+- Produces: `App({ locale }: { locale: Locale })`。トレースの節は`<section class="trace">`、各行は`<details class="trace-row {kind}">`、バーは`<span class="bar" style="left:..%;width:..%">`、開いたスパンの終端は`<span class="open-end">`。Task 6はこのclass名を使う
 
 レイアウト・余白・モバイルでの崩し方はモック`mockup.html`に合わせる。設計書「ビジュアル方針」の箇条（キャレット、ガイド線、期間の文字表示、2段ラベル、アイコンを名前の左、Writingは年を左に置いた1列のリストなど）をすべて満たす。
 
@@ -308,16 +315,16 @@ test('言語切替は末尾スラッシュ付きのパスを指す', () => {
 ### Task 6: アニメーション
 
 **Files:**
-- Create: `src/hooks/useTraceAnimation.ts`, `playwright.config.ts`
-- Modify: `src/components/Trace.tsx`
+- Create: `src/animation/trace.ts`, `playwright.config.ts`
+- Modify: `src/entry-client.ts`
 - Test: `tests/e2e/site.spec.ts`
 
 **Interfaces:**
-- Consumes: Task 4のclass名（`.trace-row`、`.bar`、`.open-end`、`.tick`、`.detail`）
-- Produces: `useTraceAnimation(root: RefObject<HTMLElement | null>): void`
+- Consumes: Task 4のclass名（`.trace`、`.trace-row`、`.bar`、`.open-end`、`.tick`、`.detail`）
+- Produces: `startTraceAnimation(root: HTMLElement): () => void`（戻り値はscopeを`revert()`する後始末の関数）。`entry-client.ts`は`document.querySelector<HTMLElement>('.trace')`があればそれを渡して呼ぶ
 - `playwright.config.ts`: `webServer`で`pnpm build && pnpm exec wrangler dev --port 8787`を起動し、`baseURL: 'http://localhost:8787'`
 
-動きの内容はモック`mockup.html`のスクリプトと同じにする（目盛り → 開始年順にバーが`scaleX`で伸びる → 現職の終端に一度だけopen色が灯る、`<details>`を開くと高さと透明度が動く）。`createScope({ root, mediaQueries: { reduceMotion: '(prefers-reduced-motion)' } })`を`useEffect`内で作り、後始末で`revert()`を呼ぶ。reduce時は何もしない。
+動きの内容はモック`mockup.html`のスクリプトと同じにする（目盛り → 開始年順にバーが`scaleX`で伸びる → 現職の終端に一度だけopen色が灯る、`<details>`を開くと高さと透明度が動く）。`createScope({ root, mediaQueries: { reduceMotion: '(prefers-reduced-motion)' } })`をprerender済みのDOMに対して作る。reduce時は何もしない。Reactのコンポーネントやフックは使わない。
 
 - [ ] **Step 1: 失敗するテストを書く**
 
@@ -340,7 +347,7 @@ test('アニメーション後、バーは最終状態に落ち着く', async ({
   const transforms = await page.locator('.bar').evaluateAll((els) => els.map((el) => getComputedStyle(el).transform));
   expect(transforms.every((t) => t === 'none' || t === 'matrix(1, 0, 0, 1, 0, 0)')).toBe(true);
 });
-test('ハイドレーションのエラーが出ない', async ({ page }) => {
+test('コンソールにエラーが出ない', async ({ page }) => {
   const errors: string[] = [];
   page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
   await page.goto('/'); await page.goto('/en/');
@@ -348,12 +355,61 @@ test('ハイドレーションのエラーが出ない', async ({ page }) => {
 });
 ```
 
-- [ ] **Step 2: hookを入れる前の状態を確認する** Run: `pnpm exec playwright install chromium && pnpm test:e2e` Expected: 4 passed。これらは「アニメーションを足しても静的HTMLの性質を壊さない」ことを固定する回帰テストなので、hookが無い状態で通るのが正しい
-- [ ] **Step 3: `useTraceAnimation`を実装し、`Trace`から呼ぶ**
+- [ ] **Step 2: アニメーションを入れる前の状態を確認する** Run: `pnpm exec playwright install chromium && pnpm test:e2e` Expected: 4 passed。これらは「アニメーションを足しても静的HTMLの性質を壊さない」ことを固定する回帰テストなので、アニメーションが無い状態で通るのが正しい
+- [ ] **Step 3: `startTraceAnimation`を実装し、`entry-client.ts`から呼ぶ**
 - [ ] **Step 4: 通ることを確認する** Run: `pnpm test:e2e` Expected: 4 passed
 - [ ] **Step 5: コミット** `git commit -m "feat: トレースの描画と開閉のアニメーションを追加する"`
 
-### Task 7: 品質ゲート（a11y・タップ領域・コントラスト・Lighthouse）
+### Task 7: フォントの配信と重さの上限
+
+**Files:**
+- Create: `fonts/src/LINESeedJP-Regular.ttf`, `fonts/src/LINESeedJP-Bold.ttf`, `fonts/src/OFL.txt`（google/fontsの`ofl/lineseedjp/`から取得する。取得したコミットのSHAをコミットメッセージに書く）、`scripts/lib/cmap.ts`, `scripts/subset-fonts.ts`
+- Modify: `package.json`（`build`の最後に`&& tsx scripts/subset-fonts.ts`）、`src/styles.css`（`@font-face`）、`src/head.ts`（preload）
+- Test: `tests/unit/cmap.test.ts`, `tests/unit/budget.test.ts`
+
+**Interfaces:**
+- Produces:
+  - `scripts/lib/cmap.ts`: `readCodepoints(ttf: Uint8Array): Set<number>`（cmapのformat 4と12を読む）、`missingCharacters(text: string, codepoints: Set<number>): string[]`（空白、改行、制御文字は対象外）
+  - `scripts/subset-fonts.ts`: `dist/client/index.html`と`dist/client/en/index.html`の`<body>`のテキストと`<title>`を集め、`subset-font`で太さごとのwoff2を`dist/client/fonts/line-seed-jp-400.woff2`と`line-seed-jp-700.woff2`に書く。欠字があれば、その文字の一覧を出して終了コード1
+  - `src/styles.css`: `@font-face { font-family: 'LINE Seed JP'; font-weight: 400 | 700; font-display: optional; src: url('/fonts/line-seed-jp-<w>.woff2') format('woff2') }`。`body`の`font-family`は`'LINE Seed JP', system-ui, sans-serif`
+  - `src/head.ts`: 2つのwoff2に`<link rel="preload" as="font" type="font/woff2" crossorigin>`を出す
+
+- [ ] **Step 1: 失敗するテストを書く**
+
+```ts
+// tests/unit/cmap.test.ts
+test('LINE Seed JPのRegularが価値提案の文字を全部持つ', () => {
+  const codepoints = readCodepoints(readFileSync('fonts/src/LINESeedJP-Regular.ttf'));
+  expect(missingCharacters('成長するSaaSを10年以上、作っては作り直してきました。', codepoints)).toEqual([]);
+});
+test('フォントにない文字を欠字として返す', () => {
+  const codepoints = readCodepoints(readFileSync('fonts/src/LINESeedJP-Regular.ttf'));
+  expect(missingCharacters('A😀B', codepoints)).toEqual(['😀']);
+});
+```
+
+```ts
+// tests/unit/budget.test.ts（pnpm buildの後に実行する）
+test('ブラウザに送るJSにReactが含まれない', () => {
+  const js = jsFiles('dist/client').map((f) => readFileSync(f, 'utf8')).join('\n');
+  expect(js).not.toMatch(/react-dom|__reactContainer|__reactFiber/);
+});
+test('ビルド結果がそれぞれの上限以下', () => {
+  expect(totalBytes('dist/client', '.js')).toBeLessThanOrEqual(BUDGET.js);
+  expect(totalBytes('dist/client', '.css')).toBeLessThanOrEqual(BUDGET.css);
+  for (const f of ['line-seed-jp-400.woff2', 'line-seed-jp-700.woff2']) expect(statSync(`dist/client/fonts/${f}`).size).toBeLessThanOrEqual(BUDGET.font);
+  expect(statSync('dist/client/profile.jpg').size).toBeLessThanOrEqual(BUDGET.image);
+});
+```
+
+- [ ] **Step 2: 失敗を確認する** Run: `pnpm build && pnpm vitest run tests/unit/cmap.test.ts tests/unit/budget.test.ts` Expected: FAIL（モジュールやフォントがない）
+- [ ] **Step 3: `cmap.ts`と`subset-fonts.ts`を実装し、フォントの元ファイルと`OFL.txt`を置く**
+- [ ] **Step 4: 上限を決める** `pnpm build`の後に、JS、CSS、各woff2、`profile.jpg`の実際の大きさを測り、それぞれに2割の余裕を足した値を`BUDGET`に書く。測った値はコミットメッセージに残す
+- [ ] **Step 5: 欠字でビルドが止まることを確かめる** `site.ts`の文面に一時的に`😀`を足して`pnpm build`を実行し、終了コード1と欠字の一覧が出ることを確かめてから戻す
+- [ ] **Step 6: 通ることを確認する** Run: `pnpm build && pnpm test && pnpm lint && pnpm typecheck && pnpm fmt:check` Expected: すべてexit 0
+- [ ] **Step 7: コミット** `git commit -m "feat: LINE Seed JPを文字を絞って配り、ビルド結果の重さに上限を設ける"`
+
+### Task 8: 品質ゲート（a11y・タップ領域・コントラスト・Lighthouse）
 
 **Files:**
 - Create: `tests/unit/contrast.test.ts`, `scripts/lighthouse.ts`
@@ -412,7 +468,7 @@ test('横スクロールが出ない', async ({ browser }) => {
 - [ ] **Step 5: 印刷を確認する**（手動）ブラウザの印刷プレビューで、閉じた行の中身も出ていて装飾が消えていること
 - [ ] **Step 6: コミット** `git commit -m "test: a11y・コントラスト・Lighthouseの品質ゲートを追加する"`
 
-### Task 8: 公開
+### Task 9: 公開
 
 **Files:**
 - Modify: `wrangler.json`（`"routes": [{ "pattern": "me.funailog.com", "custom_domain": true }]`）

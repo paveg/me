@@ -37,7 +37,7 @@ funailog.comの`/portfolio`にある経歴を独立サイトとして切り出�
 - ホスティング: Cloudflare Workersのstatic assets（Workerコードなし）。ドメインは`me.funailog.com`（funailog.comゾーンのcustom domain）
 - スタック: Vite + React 19 + anime.js v4（確認時点の最新は4.5.0）
 - スタイル: 素のCSSとカスタムプロパティ。UIライブラリは入れない
-- リンター: oxlint（本人の指定）。型検査は`tsc --noEmit`。フォーマッタは同じoxcのoxfmtを第一候補にする（確認時点で0.79.0とまだ1.0前なので、問題があればPrettierに切り替える。builderの判断）
+- 言語とツール: コードはすべてTypeScriptで書く（ビルド用のスクリプトも含む）。lintはoxlint、フォーマットはoxfmt（どちらもoxc、本人の指定）。型検査は`tsc --noEmit`
 - 経歴の正（source of truth）: 当面はfunailogと二重管理になる（既知の重複。下記「既知の課題」参照）
 - careerリポジトリにある応募状況や年収などの情報は、サイトに一切載せない
 
@@ -51,7 +51,7 @@ funailog.comの`/portfolio`にある経歴を独立サイトとして切り出�
 
 | 案 | 内容 | 判断 |
 | --- | --- | --- |
-| A. Vite + React + 自前prerender | ViteのSSRビルドで`renderToString`し、2枚のHTMLを書き出してクライアントでハイドレーションする | **採用**。依存が増えず、スクリプトは数十行で済む。2ページなら十分 |
+| A. Vite + React + 自前prerender | ViteのSSRビルドで`renderToString`し、2枚のHTMLを書き出す。ブラウザではハイドレーションせず、アニメーションのモジュールだけを動かす | **採用**。依存が増えず、スクリプトは数十行で済む。2ページなら十分。操作は`<details>`がHTMLだけでこなすので、Reactのランタイムを送らずに済む（本人の決定） |
 | B. SSGプラグイン（vite-react-ssg等） | 自前のコードは減る | React 19への追従に左右される依存が増えるため不採用 |
 | C. React Router v7 framework mode + prerender | ルーティング・head管理が揃い、フォーム追加も自然 | 2ページには抽象が重く、ミニマルの方針と逆向きなので不採用 |
 | 素のCSR SPA | — | 空のHTMLになり、JS無効時に読めず、言語別のheadも出せないため候補外 |
@@ -140,10 +140,18 @@ Contact
 
 文字
 
-- IBM Plex Sans JP（日英とも1ファミリー）。英数字のデザインが日本語と揃い、tabular figuresで年の目盛りが揃う
-- 名前は大きく、ウェイトは600、字間を詰めて「組んだ文字」として見せる。ほかは400と500だけを使う
+- LINE Seed JP（日英とも1ファミリー、本人の指定）。和文と英数字が揃うように作られている。SIL OFL 1.1で、予約フォント名の指定はない（google/fontsの`ofl/lineseedjp/OFL.txt`で確認）
+- 使う太さは2つ。名前、見出し、会社名、ボタンは700、ほかは400。名前は大きく、字間を詰めて「組んだ文字」として見せる
+- 数字はプロポーショナルのまま使う。この書体には`tnum`がない（GSUBの機能一覧で確認）。年の目盛りは位置を割合で決めて置き、期間の表記は右揃えにするので、桁がずれても読みにくくならない。数字だけ別の書体にしたり、全角数字にしたりはしない
 - 全大文字のラベル、見出し上の小さな見出し、中黒で連結したメタ情報、矢印付きリンクは使わない
 - 年の目盛りやスパンの期間を等幅フォントで書かない
+
+フォントの配り方
+
+- ビルドのときに、`/`と`/en/`で使う文字だけを含むwoff2を太さごとに作り、同じドメインから配る。外部のフォント配信（Google Fontsなど）には接続しない
+- 元のTTF（RegularとBold）と`OFL.txt`をリポジトリに入れる。ビルドのたびにネットワークから取らない
+- 画面に表示される文字（`<body>`の本文と`<title>`）に、フォントにない文字が1つでもあれば、ビルドを失敗させる（文面を変えたときに、一部だけ別の書体で出る事故を防ぐ）
+- 2つのwoff2を`<link rel="preload">`で先に読み込み、`font-display: optional`にする。読み込みが間に合わなければ、そのページは代わりの書体のまま表示し、途中で書体を差し替えない。名前の位置がずれず、CLSが出ない
 
 動き
 
@@ -161,10 +169,22 @@ Contact
 - フッターに「このサイトはClaude Codeで設計・実装しました」とリポジトリ（`https://github.com/paveg/me`、公開。gh-infraのマニフェストで作成）へのリンクを置く。Workの各プロダクトには、AIの使用有無を書かない（本人が確認していないため）
 - 「頼めること」の文面とUI文言は新規データとして持つ。日英それぞれ用意する。**文面は本人の主張になるので、builderの叩き台を本人が承認してから載せる**
 - `profile.jpg`をfunailogの`public/`からコピーする
+- 英語版のトレースの2段目は、プロフィールREADME（paveg/paveg）の経歴SVG用に書いた文言を叩き台にする。会社名は英語の正式表記（freee K.K.、ACALL Inc.、Xtop Technology K.K.）にする。叩き台なので、ほかの文面と同じく公開前に本人の承認を取る
+  - freee K.K.: Cloud accounting and HR SaaS
+  - Software Engineer: Bank and card API integrations
+  - Tech Lead: Launching a lending service
+  - Tech Lead: Paper receipts to journal entries
+  - EM / Tech Lead: Rebuilding a tax accountant service
+  - EM / Tech Lead: Launching an employee app
+  - Architect: Splitting the HR platform
+  - SRE / Tech Lead: Developer platform
+  - ACALL Inc.: Rails upgrade (contract)
+  - Xtop Technology K.K.: Systems integrator, on-prem to AWS
 
 ### アニメーション（anime.js v4）
 
-- Reactでは`createScope({ root, mediaQueries: { reduceMotion: '(prefers-reduced-motion)' } })`を`useEffect`内で作り、後始末で`revert()`を呼ぶ。anime.jsの操作はハイドレーション後のeffect内に限る
+- アニメーションは、prerender済みのDOMに対して動く素のTypeScriptのモジュールとして書く（Reactのコンポーネントやフックにしない）。`createScope({ root, mediaQueries: { reduceMotion: '(prefers-reduced-motion)' } })`を作り、後始末のために`revert()`を呼ぶ関数を返す
+- ブラウザに送るJSは、このモジュールとanime.jsだけにする。Reactはビルドのときにだけ使う
 - 出現アニメのために要素を最初に隠す処理はJS側で、しかもreduced-motionでないときだけ行う。CSSやprerender済みHTMLには隠す指定を書かない
 - Heroの名前（LCP要素）は最初から表示する
 - 動かす対象は「動き」の節に書いたものだけにする（読み込み時のトレース描画と、`<details>`の開閉）。セクションごとのスクロール連動の出現は入れない
@@ -193,6 +213,8 @@ Contact
 | oxlintと`tsc --noEmit`がエラーなしで通る | 自動 |
 | 日本語の文面（YAMLとUI文言）で、半角英数字の前後に空白がない。「PjM」が残っていない | 自動（文面を走査するテスト） |
 | `/`と`/en/`のLighthouse Performance・Accessibilityがともに95以上 | 自動（Lighthouse CLIをローカルのプレビューに実行） |
+| `dist/client`のJS、CSS、フォント、画像の大きさが、それぞれの上限以下。ブラウザに送るJSにReactが含まれない | 自動（ビルド結果を測るテスト。上限は、フォントを入れた時点（計画のTask 7）の実測に2割の余裕を足して決める） |
+| 画面に表示される文字（`<body>`の本文と`<title>`）がすべて、配るフォントに含まれる | 自動（ビルドが失敗する）。`alt`や`aria-label`、`<meta>`の文字は画面のフォントで描かれないので対象外 |
 | JS無効で全セクションの本文が読める | 自動（PlaywrightでJSを無効にしてテキストの存在を確認） |
 | reduced-motion時に要素が最終状態で表示されている | 自動（Playwrightの`reducedMotion: 'reduce'`） |
 | axeの違反がゼロ | 自動（Playwright + axe-core） |
