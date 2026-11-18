@@ -60,3 +60,24 @@ test('印刷用のスタイルが閉じた<details>の中身を出す', () => {
   expect(css).toContain('@media print');
   expect(css).toContain('::details-content');
 });
+
+test('会社の行は開始順に並ぶ', () => {
+  expect(ja.indexOf('class="trace-row other"')).toBeLessThan(
+    ja.indexOf('class="trace-row parent"'),
+  );
+  expect(ja.lastIndexOf('class="trace-row other"')).toBeGreaterThan(
+    ja.lastIndexOf('class="trace-row child"'),
+  );
+});
+
+test('各行にspanの長さを書き、支援技術には読ませない', () => {
+  expect(ja).toContain('<span class="duration" aria-hidden="true"');
+  expect(ja).toMatch(/class="duration"[^>]*>3y 8m</);
+  expect(en).toMatch(/class="duration"[^>]*>3y 8m</);
+});
+
+test('「現在」の線の位置と文言', () => {
+  expect(ja).toMatch(/<section class="trace"[^>]*style="--now:\d+(\.\d+)?%"/);
+  expect(ja).toMatch(/class="now-label"[^>]*>現在</);
+  expect(en).toMatch(/class="now-label"[^>]*>Now</);
+});

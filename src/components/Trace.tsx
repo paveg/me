@@ -1,9 +1,11 @@
+import type { CSSProperties } from 'react';
 import type { Locale } from '../entry-server';
 import type { SiteCopy } from '../data/site';
 import type { PortfolioData } from '../data/types';
 import {
   axisTicks,
   buildTraceRows,
+  endPercent,
   formatPeriod,
   positionPercent,
   type TraceRow,
@@ -12,6 +14,8 @@ import { joinLines } from '../lib/text';
 import { Icon } from './Icon';
 
 const TICK_STEP_YEARS = 2;
+
+type CustomProperties = CSSProperties & Record<`--${string}`, string>;
 
 function TraceDetail({ row, locale }: { row: TraceRow; locale: Locale }) {
   return (
@@ -56,8 +60,10 @@ export function Trace({
   locale: Locale;
 }) {
   const rows = buildTraceRows(profile, copy.traceLabels, __BUILD_MONTH__);
+  const nowPercent = `${endPercent(__BUILD_MONTH__).toFixed(2)}%`;
+  const traceStyle: CustomProperties = { '--now': nowPercent };
   return (
-    <section className="trace" aria-label={copy.ui.traceHeading}>
+    <section className="trace" aria-label={copy.ui.traceHeading} style={traceStyle}>
       <p className="trace-hint">{copy.traceHint}</p>
       <div className="axis">
         <div className="ticks">
@@ -66,35 +72,41 @@ export function Trace({
               {year}
             </span>
           ))}
+          <span className="now-label" style={{ left: nowPercent }}>
+            {copy.ui.now}
+          </span>
         </div>
       </div>
-      {rows.map((row) => (
-        <details key={row.key} className={`trace-row ${row.kind}`}>
-          <summary>
-            <span className="label">
-              <Icon name="caret" className="caret" />
-              <span className="label-text">
-                <span className="role">{row.label}</span>
-                <span className="period">{formatPeriod(row.start, row.end, copy.ui.present)}</span>
-                <small>{row.sub}</small>
+      {rows.map((row) => {
+        const rightEdge = `${(row.left + row.width).toFixed(2)}%`;
+        return (
+          <details key={row.key} className={`trace-row ${row.kind}`}>
+            <summary>
+              <span className="label">
+                <Icon name="caret" className="caret" />
+                <span className="label-text">
+                  <span className="role">{row.label}</span>
+                  <span className="period">
+                    {formatPeriod(row.start, row.end, copy.ui.present)}
+                  </span>
+                  <small>{row.sub}</small>
+                </span>
               </span>
-            </span>
-            <span className="track">
-              <span
-                className="bar"
-                style={{ left: `${row.left.toFixed(2)}%`, width: `${row.width.toFixed(2)}%` }}
-              />
-              {row.isOpen && (
+              <span className="track">
                 <span
-                  className="open-end"
-                  style={{ left: `${(row.left + row.width).toFixed(2)}%` }}
+                  className="bar"
+                  style={{ left: `${row.left.toFixed(2)}%`, width: `${row.width.toFixed(2)}%` }}
                 />
-              )}
-            </span>
-          </summary>
-          <TraceDetail row={row} locale={locale} />
-        </details>
-      ))}
+                {row.isOpen && <span className="open-end" style={{ left: rightEdge }} />}
+                <span className="duration" aria-hidden="true" style={{ left: rightEdge }}>
+                  {row.duration}
+                </span>
+              </span>
+            </summary>
+            <TraceDetail row={row} locale={locale} />
+          </details>
+        );
+      })}
     </section>
   );
 }
