@@ -158,7 +158,7 @@ Contact
 - ビルド時にYAMLを読み込む。型はfunailogの`src/schemas/portfolio-collection.ts`から、zod抜きのTypeScript型として移植する（実行時の検証は省く。他人がデータを編集するようになったら足す）
 - 価値提案（承認済み）: 「プロダクトの設計から、それを動かす基盤まで。成長するSaaSを10年以上、作っては作り直してきました。」／ "From product design to the platform it runs on. Over a decade of building, and rebuilding, a growing SaaS."
 - 「頼めること」は (1) Kubernetes / EKS基盤とCI/CDの改善、(2) レガシーのリモデリングとAPI設計、(3) Webアプリケーションの立ち上げ（Claude Codeを中心にした開発）の3つ
-- フッターに「このサイトはClaude Codeで設計・実装しました」とリポジトリへのリンクを置く。Workの各プロダクトには、AIの使用有無を書かない（本人が確認していないため）
+- フッターに「このサイトはClaude Codeで設計・実装しました」とリポジトリ（`https://github.com/paveg/me`、公開。gh-infraのマニフェストで作成）へのリンクを置く。Workの各プロダクトには、AIの使用有無を書かない（本人が確認していないため）
 - 「頼めること」の文面とUI文言は新規データとして持つ。日英それぞれ用意する。**文面は本人の主張になるので、builderの叩き台を本人が承認してから載せる**
 - `profile.jpg`をfunailogの`public/`からコピーする
 

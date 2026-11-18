@@ -25,6 +25,14 @@
 - 文面（「頼めること」、トレースの2段目、UI文言の英語版）は叩き台として実装し、公開前に本人の承認を得る
 - デプロイは実行直前に本人の確認を取る
 
+## スタックPRでの進め方
+
+- GitHubのリポジトリは`paveg/me`（公開、gh-infraで作成。マージはsquashのみ）。ローカルの`portfolio/`に`origin`として登録する
+- 1タスク＝1ブランチ＝1PRとして、`gh stack`で依存順に積む。ブランチ名は`v1/scaffold`、`v1/data`、`v1/trace`、`v1/sections`、`v1/head`、`v1/animation`、`v1/quality`、`v1/deploy`
+- 各タスクは、メインセッションが`gh stack add <ブランチ名>`でブランチを作り、implementerサブエージェントがworktreeで実装し、終わったらメインセッションがそのブランチへfast-forwardで取り込む。下の層を直す必要が出たら、その層のブランチで直して`gh stack rebase --upstack`する
+- `site.ts`の`sourceUrl`は`https://github.com/paveg/me`
+- push・PR作成・マージは、本人の確認を取ってから行う
+
 ## Review Focus
 
 - **ハイドレーションの不一致**: 「現在」の月をクライアントで`new Date()`から取ると、prerenderしたHTMLと食い違う。ビルド時の月をViteの`define`で埋め込み、サーバーとクライアントで同じ値を使う（Task 3のテストで固定する）
