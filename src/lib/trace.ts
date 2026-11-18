@@ -12,6 +12,7 @@ export type TraceRow = {
   end: string | null;
   left: number;
   width: number;
+  duration: string;
   isOpen: boolean;
   role: string;
   description: string;
@@ -32,6 +33,23 @@ export function positionPercent(ym: string): number {
   return ((toYearFraction(ym) - AXIS.start) / (AXIS.end - AXIS.start)) * 100;
 }
 
+export function endPercent(ym: string): number {
+  return ((toYearFraction(ym) + 1 / 12 - AXIS.start) / (AXIS.end - AXIS.start)) * 100;
+}
+
+function toMonthCount(ym: string): number {
+  const match = YEAR_MONTH.exec(ym);
+  if (!match) throw new Error(`Invalid period: ${ym}`);
+  return Number(match[1]) * 12 + Number(match[2]);
+}
+
+export function formatDuration(start: string, end: string | null, now: string): string {
+  const months = toMonthCount(end ?? now) - toMonthCount(start) + 1;
+  const years = Math.floor(months / 12);
+  const rest = months % 12;
+  return [years > 0 ? `${years}y` : '', rest > 0 ? `${rest}m` : ''].filter(Boolean).join(' ');
+}
+
 function findLabel(labels: Record<string, TraceLabel>, key: string | undefined): TraceLabel {
   const label = key === undefined ? undefined : labels[key];
   if (!label) throw new Error(`Missing trace label: ${key}`);
@@ -45,13 +63,14 @@ type RowSource = Pick<
 
 function toRow(source: RowSource, label: TraceLabel, now: string): TraceRow {
   const left = positionPercent(source.start);
-  const right = positionPercent(source.end ?? now);
+  const right = endPercent(source.end ?? now);
   return {
     ...source,
     label: label.label,
     sub: label.sub,
     left,
     width: right - left,
+    duration: formatDuration(source.start, source.end, now),
     isOpen: source.end === null,
   };
 }
@@ -61,8 +80,14 @@ export function buildTraceRows(
   labels: Record<string, TraceLabel>,
   now: string,
 ): TraceRow[] {
+  if (toMonthCount(now) > AXIS.end * 12) {
+    throw new Error(`Build month ${now} is beyond the axis end ${AXIS.end}`);
+  }
   const rows: TraceRow[] = [];
-  for (const company of data.workExperience) {
+  const oldestFirstCompanies = [...data.workExperience].sort((a, b) =>
+    a.period.start.localeCompare(b.period.start),
+  );
+  for (const company of oldestFirstCompanies) {
     const roles = company.roles ?? [];
     rows.push(
       toRow(
