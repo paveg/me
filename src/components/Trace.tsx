@@ -3,6 +3,7 @@ import type { Locale } from '../entry-server';
 import type { SiteCopy } from '../data/site';
 import type { PortfolioData } from '../data/types';
 import {
+  AXIS,
   axisTicks,
   buildTraceRows,
   endPercent,
@@ -61,14 +62,19 @@ export function Trace({
 }) {
   const rows = buildTraceRows(profile, copy.traceLabels, __BUILD_MONTH__);
   const nowPercent = `${endPercent(__BUILD_MONTH__).toFixed(2)}%`;
-  const traceStyle: CustomProperties = { '--now': nowPercent };
+  const gridStep = `${((TICK_STEP_YEARS / (AXIS.end - AXIS.start)) * 100).toFixed(2)}%`;
+  const traceStyle: CustomProperties = { '--now': nowPercent, '--grid-step': gridStep };
   return (
     <section className="trace" aria-label={copy.ui.traceHeading} style={traceStyle}>
       <p className="trace-hint">{copy.traceHint}</p>
-      <div className="axis">
+      <div className="axis" aria-hidden="true">
         <div className="ticks">
-          {axisTicks(TICK_STEP_YEARS).map((year) => (
-            <span key={year} className="tick" style={{ left: `${positionPercent(`${year}-01`)}%` }}>
+          {axisTicks(TICK_STEP_YEARS).map((year, index) => (
+            <span
+              key={year}
+              className={index % 2 === 1 ? 'tick minor' : 'tick'}
+              style={{ left: `${positionPercent(`${year}-01`)}%` }}
+            >
               {year}
             </span>
           ))}

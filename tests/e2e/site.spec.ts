@@ -26,7 +26,9 @@ const countAnimatedInlineStyles = (page: Page) =>
       (els) =>
         els.filter(
           (el) =>
-            (el as HTMLElement).style.transform !== '' || (el as HTMLElement).style.opacity !== '',
+            (el as HTMLElement).style.transform !== '' ||
+            (el as HTMLElement).style.opacity !== '' ||
+            (el as HTMLElement).style.transition !== '',
         ).length,
     );
 
@@ -52,6 +54,13 @@ test('アニメーション後、バーは最終状態に落ち着く', async ({
   await expect
     .poll(async () => (await readBarTransforms(page)).every(isIdentity), { timeout: 10_000 })
     .toBe(true);
+  await expect(page.locator('.playhead')).toHaveCount(0);
+});
+
+test('アニメーション後、フェードのインラインのスタイルも残らない', async ({ page }) => {
+  await page.goto('/');
+  await expect.poll(() => countAnimatedInlineStyles(page), { timeout: 5000 }).toBeGreaterThan(0);
+  await expect.poll(() => countAnimatedInlineStyles(page), { timeout: 10_000 }).toBe(0);
   await expect(page.locator('.playhead')).toHaveCount(0);
 });
 

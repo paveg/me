@@ -77,7 +77,21 @@ test('各行にspanの長さを書き、支援技術には読ませない', () =
 });
 
 test('「現在」の線の位置と文言', () => {
-  expect(ja).toMatch(/<section class="trace"[^>]*style="--now:\d+(\.\d+)?%"/);
+  expect(ja).toMatch(/<section class="trace"[^>]*style="--now:\d+(\.\d+)?%;/);
   expect(ja).toMatch(/class="now-label"[^>]*>現在</);
   expect(en).toMatch(/class="now-label"[^>]*>Now</);
+});
+
+test('目盛り線の間隔を軸と刻みから計算して書く', () => {
+  expect(ja).toMatch(/<section class="trace"[^>]*style="[^"]*--grid-step:16\.67%/);
+});
+
+test('モバイルで隠す目盛りは2017・2021・2025だけ', () => {
+  const minorYears = [...ja.matchAll(/class="tick minor"[^>]*>(\d{4})</g)].map((m) => m[1]);
+  expect(minorYears).toEqual(['2017', '2021', '2025']);
+  expect(ja.match(/class="tick"/g)).toHaveLength(3);
+});
+
+test('軸は支援技術に読ませない', () => {
+  expect(ja).toContain('<div class="axis" aria-hidden="true">');
 });

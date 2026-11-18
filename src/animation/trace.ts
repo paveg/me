@@ -117,16 +117,26 @@ export function startTraceAnimation(root: HTMLElement): () => void {
         for (const el of fades) el.style.opacity = progress >= 1 ? '1' : '0';
       }
     };
+    let fadeCleanupTimer: number | undefined;
     const finish = () => {
+      window.clearTimeout(fadeCleanupTimer);
       clearSpanStyles(spans);
       playhead.remove();
     };
+    const finishAfterFade = () => {
+      for (const { bar, fades } of spans) {
+        bar.style.transform = '';
+        for (const el of fades) el.style.opacity = '1';
+      }
+      playhead.remove();
+      fadeCleanupTimer = window.setTimeout(() => clearSpanStyles(spans), FADE_DURATION_MS);
+    };
 
+    if (axis) playhead.style.top = `${axis.offsetTop}px`;
+    render(0);
     for (const { fades } of spans) {
       for (const el of fades) el.style.transition = `opacity ${FADE_DURATION_MS}ms`;
     }
-    if (axis) playhead.style.top = `${axis.offsetTop}px`;
-    render(0);
 
     const state = { cursor: 0 };
     animate(state, {
@@ -135,7 +145,7 @@ export function startTraceAnimation(root: HTMLElement): () => void {
       delay: PLAYHEAD_DELAY_MS,
       ease: 'inOutSine',
       onUpdate: () => render(state.cursor),
-      onComplete: finish,
+      onComplete: finishAfterFade,
     });
 
     const unbinds = [...root.querySelectorAll<HTMLDetailsElement>('details.trace-row')].map(
