@@ -1,7 +1,14 @@
 import { Fragment } from 'react';
-import { contacts, type SiteCopy } from '../data/site';
+import { contacts, siteCopy, type SiteCopy } from '../data/site';
 import type { Profile } from '../data/types';
+import type { Locale } from '../entry-server';
+import { pagePath } from '../head';
 import { Icon } from './Icon';
+
+const languages = [
+  { locale: 'ja', name: siteCopy.en.ui.switchLanguage },
+  { locale: 'en', name: siteCopy.ja.ui.switchLanguage },
+] as const;
 
 const socialLinks = [
   { icon: 'github', label: 'GitHub', href: contacts.github },
@@ -11,9 +18,30 @@ const socialLinks = [
 
 const splitAfterCommas = (line: string) => line.split(/(?<=、)/);
 
-export function Hero({ profile, copy }: { profile: Profile; copy: SiteCopy }) {
+export function Hero({
+  profile,
+  copy,
+  locale,
+}: {
+  profile: Profile;
+  copy: SiteCopy;
+  locale: Locale;
+}) {
   return (
     <header className="hero">
+      <nav className="lang" aria-label="Language">
+        {languages.map((language) =>
+          language.locale === locale ? (
+            <span key={language.locale} lang={language.locale} aria-current="page">
+              {language.name}
+            </span>
+          ) : (
+            <a key={language.locale} lang={language.locale} href={pagePath(language.locale)}>
+              {language.name}
+            </a>
+          ),
+        )}
+      </nav>
       <div className="name-row">
         <img className="avatar" src="/profile.jpg" alt="" width="96" height="96" />
         <h1 className="name">{profile.name}</h1>
