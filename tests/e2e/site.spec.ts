@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 
 test('JS無効でも全節の本文とバーが見える', async ({ browser }) => {
   const page = await (await browser.newContext({ javaScriptEnabled: false })).newPage();
@@ -9,22 +9,43 @@ test('JS無効でも全節の本文とバーが見える', async ({ browser }) =
   await expect(page.locator('.bar').first()).toBeVisible();
 });
 
+const isIdentity = (t: string) => t === 'none' || t === 'matrix(1, 0, 0, 1, 0, 0)';
+
+const readBarTransforms = (page: Page) =>
+  page.locator('.bar').evaluateAll((els) => els.map((el) => getComputedStyle(el).transform));
+
+const countAnimatedInlineStyles = (page: Page) =>
+  page
+    .locator('.bar, .tick, .open-end')
+    .evaluateAll(
+      (els) =>
+        els.filter(
+          (el) =>
+            (el as HTMLElement).style.transform !== '' || (el as HTMLElement).style.opacity !== '',
+        ).length,
+    );
+
 test('reduced-motionではバーが最初から最終状態', async ({ browser }) => {
   const page = await (await browser.newContext({ reducedMotion: 'reduce' })).newPage();
   await page.goto('/');
-  const transforms = await page
-    .locator('.bar')
-    .evaluateAll((els) => els.map((el) => getComputedStyle(el).transform));
-  expect(transforms.every((t) => t === 'none' || t === 'matrix(1, 0, 0, 1, 0, 0)')).toBe(true);
+  expect((await readBarTransforms(page)).every(isIdentity)).toBe(true);
+
+  await page.waitForLoadState('load');
+  await page.waitForTimeout(200);
+  expect(await countAnimatedInlineStyles(page)).toBe(0);
+});
+
+test('reduced-motionでなければアニメーションが走る', async ({ page }) => {
+  await page.goto('/');
+  await expect.poll(() => countAnimatedInlineStyles(page), { timeout: 5000 }).toBeGreaterThan(0);
 });
 
 test('アニメーション後、バーは最終状態に落ち着く', async ({ page }) => {
   await page.goto('/');
-  await page.waitForTimeout(3000);
-  const transforms = await page
-    .locator('.bar')
-    .evaluateAll((els) => els.map((el) => getComputedStyle(el).transform));
-  expect(transforms.every((t) => t === 'none' || t === 'matrix(1, 0, 0, 1, 0, 0)')).toBe(true);
+  await expect.poll(() => countAnimatedInlineStyles(page), { timeout: 5000 }).toBeGreaterThan(0);
+  await expect
+    .poll(async () => (await readBarTransforms(page)).every(isIdentity), { timeout: 10_000 })
+    .toBe(true);
 });
 
 test('コンソールにエラーが出ない', async ({ page }) => {
