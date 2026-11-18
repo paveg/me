@@ -3,6 +3,8 @@ import type { Locale } from './entry-server';
 
 export const SITE_URL = 'https://me.funailog.com';
 
+const FONT_WEIGHTS = [400, 700];
+
 const OG_LOCALES: Record<Locale, string> = { ja: 'ja_JP', en: 'en_US' };
 
 export function pagePath(locale: Locale): '/' | '/en/' {
@@ -39,5 +41,9 @@ export function buildHead(locale: Locale): string {
     `<meta property="og:locale" content="${OG_LOCALES[locale]}">`,
     `<meta property="og:locale:alternate" content="${OG_LOCALES[otherLocale]}">`,
     `<meta name="twitter:card" content="summary">`,
+    ...FONT_WEIGHTS.map(
+      (weight) =>
+        `<link rel="preload" as="font" type="font/woff2" href="/fonts/line-seed-jp-${weight}.woff2" crossorigin>`,
+    ),
   ].join('\n    ');
 }
