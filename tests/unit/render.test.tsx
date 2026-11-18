@@ -1,0 +1,50 @@
+import { renderToString } from 'react-dom/server';
+import { expect, test } from 'vitest';
+import { App } from '../../src/App';
+
+const ja = renderToString(<App locale="ja" />);
+const en = renderToString(<App locale="en" />);
+
+test('節が設計どおりの順に並ぶ', () => {
+  const order = [
+    'class="hero"',
+    'class="trace"',
+    'id="offers"',
+    'id="work"',
+    'id="writing"',
+    'id="contact"',
+    '<footer',
+  ];
+  const positions = order.map((marker) => ja.indexOf(marker));
+  expect(positions.every((p) => p >= 0)).toBe(true);
+  expect([...positions].sort((a, b) => a - b)).toEqual(positions);
+});
+
+test('トレースは10行の<details>で、期間を文字でも出す', () => {
+  expect(ja.match(/<details class="trace-row/g)).toHaveLength(10);
+  expect(ja).toContain('2019.07 – 2022.06');
+});
+
+test('価値提案と連絡先', () => {
+  expect(ja).toContain('成長するSaaSを10年以上、');
+  expect(ja).toContain('href="mailto:pavegy@gmail.com"');
+  expect(ja).toContain('href="https://www.linkedin.com/in/xpav"');
+});
+
+test('Writingの記事と、funailogへの案内', () => {
+  expect(ja).toContain('グローバルチーム開発での経験とその取り組み');
+  expect(ja).toContain('funailogで記事をもっと読む');
+});
+
+test('アイコンは名前より前にあり、alt=""', () => {
+  expect(ja.indexOf('class="avatar"')).toBeLessThan(ja.indexOf('class="name"'));
+  expect(ja).toMatch(/<img[^>]*class="avatar"[^>]*alt=""/);
+});
+
+test('隠す指定をHTMLに書かない', () => {
+  expect(ja).not.toMatch(/opacity:\s*0|visibility:\s*hidden/);
+});
+
+test('英語版は英語の価値提案を出す', () => {
+  expect(en).toContain('From product design to the platform it runs on.');
+});
