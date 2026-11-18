@@ -3,3 +3,5 @@ dist/
 .wrangler/
 .claude/worktrees/
 .ai/
+test-results/
+playwright-report/
