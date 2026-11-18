@@ -49,7 +49,8 @@ h1 { font-size: clamp(2rem, 5vw, 3rem); font-weight: 600; letter-spacing: -0.03e
   border: 1px solid var(--rule); background: transparent; color: var(--ink);
 }
 .controls button.primary { background: var(--ink); color: var(--paper); border-color: var(--ink); }
-.controls button:hover { border-color: var(--span); }
+.controls button:hover:enabled { border-color: var(--span); }
+.controls button:disabled { cursor: not-allowed; opacity: 0.45; }
 
 .stats { display: flex; flex-wrap: wrap; gap: 0.5rem 2.5rem; margin: 0 0 1.5rem; }
 .stats div { display: flex; flex-direction: column; }
@@ -135,7 +136,7 @@ h1 { font-size: clamp(2rem, 5vw, 3rem); font-weight: 600; letter-spacing: -0.03e
   </div>
 
   <dl class="stats">
-    <div><dt>ノード</dt><dd><span id="stat-nodes">0</span><small>台</small></dd></div>
+    <div><dt>ノード</dt><dd><span id="stat-nodes">0</span><small id="stat-max"></small></dd></div>
     <div><dt>使用率</dt><dd><span id="stat-rate">0</span><small>%</small></dd></div>
     <div><dt>統合で減らしたノード</dt><dd><span id="stat-saved">0</span><small>台</small></dd></div>
   </dl>
@@ -176,6 +177,9 @@ const enqueue = (task) => { queue = queue.then(task).catch((error) => console.er
 
 const used = (node) => node.pods.reduce((sum, pod) => sum + pod.size, 0);
 const free = (node) => CAPACITY - used(node);
+const canPlace = (size) => nodes.length < MAX_NODES || nodes.some((n) => !n.draining && free(n) >= size);
+const addButtons = document.querySelectorAll('[data-add], [data-burst]');
+document.getElementById('stat-max').textContent = `/${MAX_NODES}台`;
 
 function log(text, kind = '') {
   const item = document.createElement('li');
@@ -193,6 +197,7 @@ function refreshStats() {
   const rate = capacity ? Math.round((total / capacity) * 100) : 0;
   document.getElementById('stat-nodes').textContent = nodes.length;
   document.getElementById('stat-saved').textContent = savedNodes;
+  for (const button of addButtons) button.disabled = !canPlace(1);
   rateAnimation?.pause();
   document.getElementById('stat-rate').textContent = shownRate;
   const counter = { value: shownRate };
@@ -258,10 +263,7 @@ async function provisionNode() {
 
 async function placePod(pod) {
   let node = nodes.filter((n) => !n.draining && free(n) >= pod.size).sort((a, b) => free(a) - free(b))[0];
-  if (!node) {
-    if (nodes.length >= MAX_NODES) { log(`ノードの上限に達したため、Pod(${pod.size})は待機中のままです`); return; }
-    node = await provisionNode();
-  }
+  if (!node) node = await provisionNode();
   node.pods.push(pod);
   pod.node = node;
   await fly(pod.el, node.body, { arc: 36, duration: 520 });
@@ -270,6 +272,10 @@ async function placePod(pod) {
 }
 
 async function addPod(size = pick([1, 1, 2, 2, 2, 4])) {
+  if (!canPlace(size)) {
+    log(`Pod(${size})が入るノードがなく、上限の${MAX_NODES}台に達しているため追加しません`);
+    return false;
+  }
   const el = document.createElement('button');
   el.className = 'pod';
   el.dataset.size = size;
@@ -282,6 +288,7 @@ async function addPod(size = pick([1, 1, 2, 2, 2, 4])) {
   animate(el, { y: [-36, 0], opacity: [0, 1], duration: ms(320), ease: 'outQuad' });
   await sleep(200);
   await placePod(pod);
+  return true;
 }
 
 async function removePod(pod) {
@@ -370,7 +377,9 @@ function requestRemove(pod) {
 }
 
 document.querySelector('[data-add]').addEventListener('click', () => enqueue(() => addPod()));
-document.querySelector('[data-burst]').addEventListener('click', () => { for (let i = 0; i < 6; i++) enqueue(() => addPod()); });
+document.querySelector('[data-burst]').addEventListener('click', () => enqueue(async () => {
+  for (let i = 0; i < 6; i++) if (!(await addPod())) break;
+}));
 document.querySelector('[data-remove]').addEventListener('click', () => {
   const placed = nodes.flatMap((n) => (n.provisioning || n.draining ? [] : n.pods));
   if (placed.length) requestRemove(pick(placed));
