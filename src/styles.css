@@ -372,8 +372,21 @@ details[open] > summary .caret {
   width: 0.625rem;
   height: 0.625rem;
   margin: -0.3125rem 0 0 -0.3125rem;
+  z-index: 1;
   border-radius: 50%;
   background: var(--open);
+}
+
+.parent .open-end,
+.other .open-end {
+  width: 1.125rem;
+  height: 1.125rem;
+  margin: -0.5625rem 0 0 -0.5625rem;
+}
+
+.parent .open-end + .duration,
+.other .open-end + .duration {
+  margin-left: 0.875rem;
 }
 
 .duration {
