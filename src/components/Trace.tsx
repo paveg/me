@@ -57,7 +57,7 @@ export function Trace({
 }) {
   const rows = buildTraceRows(profile, copy.traceLabels, __BUILD_MONTH__);
   return (
-    <section className="trace">
+    <section className="trace" aria-label={copy.ui.traceHeading}>
       <p className="trace-hint">{copy.traceHint}</p>
       <div className="axis">
         <div className="ticks">

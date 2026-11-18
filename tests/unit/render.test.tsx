@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { renderToString } from 'react-dom/server';
 import { expect, test } from 'vitest';
 import { App } from '../../src/App';
@@ -47,4 +48,15 @@ test('隠す指定をHTMLに書かない', () => {
 
 test('英語版は英語の価値提案を出す', () => {
   expect(en).toContain('From product design to the platform it runs on.');
+});
+
+test('トレースの節に見出しの名前を付ける', () => {
+  expect(ja).toContain('<section class="trace" aria-label="経歴"');
+  expect(en).toContain('<section class="trace" aria-label="Career"');
+});
+
+test('印刷用のスタイルが閉じた<details>の中身を出す', () => {
+  const css = readFileSync('src/styles.css', 'utf8');
+  expect(css).toContain('@media print');
+  expect(css).toContain('::details-content');
 });

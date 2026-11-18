@@ -527,3 +527,81 @@ footer a {
     align-items: center;
   }
 }
+
+@media print {
+  :root {
+    --paper: white;
+    --ink: black;
+    --muted: dimgray;
+    --rule: darkgray;
+    --span: black;
+  }
+
+  .page {
+    max-width: none;
+    padding: 0;
+  }
+
+  .hero {
+    padding: 0 0 1rem;
+  }
+
+  h2 {
+    margin-top: 2rem;
+  }
+
+  .sprite,
+  .icon,
+  .caret,
+  .axis,
+  .track,
+  .trace-hint,
+  .trace-row.child::before {
+    display: none;
+  }
+
+  .button {
+    padding: 0;
+    border-radius: 0;
+    background: none;
+    color: var(--ink);
+  }
+
+  a {
+    text-decoration: none;
+  }
+
+  a[href^='http']::after {
+    content: ' (' attr(href) ')';
+    font-size: 0.8125rem;
+    color: var(--muted);
+    overflow-wrap: anywhere;
+  }
+
+  .trace-row {
+    break-inside: avoid;
+  }
+
+  .trace summary {
+    display: block;
+    min-height: 0;
+    transition: none;
+  }
+
+  .trace-row::details-content {
+    content-visibility: visible;
+    height: auto;
+  }
+
+  /* The open animation sets inline height and opacity on .detail */
+  .detail {
+    height: auto !important;
+    opacity: 1 !important;
+    overflow: visible;
+    padding: 0.25rem 0 0.75rem 1.5rem;
+  }
+
+  .child .detail {
+    padding-left: 2.75rem;
+  }
+}
