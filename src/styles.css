@@ -645,14 +645,10 @@ footer a {
   .icon,
   .caret,
   .axis,
+  .track,
   .trace-hint,
-  .trace-row.child::before,
-  .track::after {
+  .trace-row.child::before {
     display: none;
-  }
-
-  .track {
-    background: none;
   }
 
   .button {
