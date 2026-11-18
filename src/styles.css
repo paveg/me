@@ -169,7 +169,18 @@ summary:focus-visible {
 }
 
 .trace {
+  position: relative;
   margin-top: 1rem;
+}
+
+.playhead {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  border-left: 2px solid var(--span);
+  pointer-events: none;
 }
 
 .trace-hint {
@@ -646,6 +657,7 @@ footer a {
   .caret,
   .axis,
   .track,
+  .playhead,
   .trace-hint,
   .trace-row.child::before {
     display: none;

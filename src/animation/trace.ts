@@ -1,11 +1,36 @@
-import { animate, createScope, stagger } from 'animejs';
+import { animate, createScope } from 'animejs';
 
-const BAR_START_DELAY_MS = 300;
-const BAR_STAGGER_MS = 140;
+const PLAYHEAD_DELAY_MS = 300;
+const PLAYHEAD_DURATION_MS = 2600;
+const FADE_DURATION_MS = 300;
 const TOGGLE_DURATION_MS = 420;
 
-function sortByStart(bars: HTMLElement[]): HTMLElement[] {
-  return [...bars].sort((a, b) => parseFloat(a.style.left) - parseFloat(b.style.left));
+interface Span {
+  bar: HTMLElement;
+  left: number;
+  width: number;
+  fades: HTMLElement[];
+}
+
+const clamp01 = (value: number) => Math.min(Math.max(value, 0), 1);
+
+function readSpans(root: HTMLElement): Span[] {
+  return [...root.querySelectorAll<HTMLElement>('details.trace-row')].flatMap((row) => {
+    const bar = row.querySelector<HTMLElement>('.bar');
+    if (!bar) return [];
+    const fades = [...row.querySelectorAll<HTMLElement>('.duration, .open-end')];
+    return [{ bar, left: parseFloat(bar.style.left), width: parseFloat(bar.style.width), fades }];
+  });
+}
+
+function clearSpanStyles(spans: Span[]) {
+  for (const { bar, fades } of spans) {
+    bar.style.transform = '';
+    for (const el of fades) {
+      el.style.opacity = '';
+      el.style.transition = '';
+    }
+  }
 }
 
 function clearToggleStyles(body: HTMLElement) {
@@ -74,32 +99,52 @@ export function startTraceAnimation(root: HTMLElement): () => void {
   scope.add((self) => {
     if (self?.matches.reduceMotion) return;
 
-    const bars = sortByStart([...root.querySelectorAll<HTMLElement>('.bar')]);
-    animate(root.querySelectorAll('.tick'), {
-      scaleY: [0, 1],
-      opacity: [0, 1],
-      duration: 500,
-      delay: stagger(60),
-      ease: 'outQuad',
-    });
-    animate(bars, {
-      scaleX: [0, 1],
-      duration: 900,
-      delay: stagger(BAR_STAGGER_MS, { start: BAR_START_DELAY_MS }),
-      ease: 'outExpo',
-    });
-    animate(root.querySelectorAll('.open-end'), {
-      opacity: [0, 1],
-      scale: [0.2, 1.6, 1],
-      duration: 900,
-      delay: BAR_START_DELAY_MS + BAR_STAGGER_MS * bars.length,
-      ease: 'outElastic(1, .6)',
+    const spans = readSpans(root);
+    const axis = root.querySelector<HTMLElement>('.ticks');
+    const playhead = document.createElement('span');
+    playhead.className = 'playhead';
+    playhead.setAttribute('aria-hidden', 'true');
+    root.append(playhead);
+
+    const render = (cursor: number) => {
+      if (axis) {
+        const originX = axis.getBoundingClientRect().left - root.getBoundingClientRect().left;
+        playhead.style.transform = `translateX(${originX + (cursor / 100) * axis.clientWidth}px)`;
+      }
+      for (const { bar, left, width, fades } of spans) {
+        const progress = clamp01((cursor - left) / width);
+        bar.style.transform = `scaleX(${progress})`;
+        for (const el of fades) el.style.opacity = progress >= 1 ? '1' : '0';
+      }
+    };
+    const finish = () => {
+      clearSpanStyles(spans);
+      playhead.remove();
+    };
+
+    for (const { fades } of spans) {
+      for (const el of fades) el.style.transition = `opacity ${FADE_DURATION_MS}ms`;
+    }
+    if (axis) playhead.style.top = `${axis.offsetTop}px`;
+    render(0);
+
+    const state = { cursor: 0 };
+    animate(state, {
+      cursor: parseFloat(root.style.getPropertyValue('--now')),
+      duration: PLAYHEAD_DURATION_MS,
+      delay: PLAYHEAD_DELAY_MS,
+      ease: 'inOutSine',
+      onUpdate: () => render(state.cursor),
+      onComplete: finish,
     });
 
     const unbinds = [...root.querySelectorAll<HTMLDetailsElement>('details.trace-row')].map(
       bindToggleAnimation,
     );
-    return () => unbinds.forEach((unbind) => unbind());
+    return () => {
+      finish();
+      unbinds.forEach((unbind) => unbind());
+    };
   });
 
   return () => scope.revert();
