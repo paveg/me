@@ -14,10 +14,12 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
+    "animejs": "4.5.0",
     "react": "19.3.1",
     "react-dom": "19.3.1"
   },
   "devDependencies": {
+    "@playwright/test": "1.65.1",
     "@rollup/plugin-yaml": "5.0.1",
     "@types/node": "26.6.6",
     "@types/react": "19.3.0",
