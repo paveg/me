@@ -1,7 +1,7 @@
 import type { TraceLabel } from '../data/site';
 import type { Link, PortfolioData, Star } from '../data/types';
 
-export const AXIS = { start: 2015, end: 2027 };
+export type Axis = { start: number; end: number };
 
 export type TraceRow = {
   key: string;
@@ -29,12 +29,16 @@ export function toYearFraction(ym: string): number {
   return Number(match[1]) + (Number(match[2]) - 1) / 12;
 }
 
-export function positionPercent(ym: string): number {
-  return ((toYearFraction(ym) - AXIS.start) / (AXIS.end - AXIS.start)) * 100;
+export function axisFor(now: string): Axis {
+  return { start: 2015, end: Math.floor(toYearFraction(now)) + 1 };
 }
 
-export function endPercent(ym: string): number {
-  return ((toYearFraction(ym) + 1 / 12 - AXIS.start) / (AXIS.end - AXIS.start)) * 100;
+export function positionPercent(ym: string, axis: Axis): number {
+  return ((toYearFraction(ym) - axis.start) / (axis.end - axis.start)) * 100;
+}
+
+export function endPercent(ym: string, axis: Axis): number {
+  return ((toYearFraction(ym) + 1 / 12 - axis.start) / (axis.end - axis.start)) * 100;
 }
 
 function toMonthCount(ym: string): number {
@@ -61,9 +65,9 @@ type RowSource = Pick<
   'key' | 'kind' | 'start' | 'end' | 'role' | 'description' | 'technologies' | 'links' | 'star'
 >;
 
-function toRow(source: RowSource, label: TraceLabel, now: string): TraceRow {
-  const left = positionPercent(source.start);
-  const right = endPercent(source.end ?? now);
+function toRow(source: RowSource, label: TraceLabel, now: string, axis: Axis): TraceRow {
+  const left = positionPercent(source.start, axis);
+  const right = endPercent(source.end ?? now, axis);
   return {
     ...source,
     label: label.label,
@@ -80,9 +84,7 @@ export function buildTraceRows(
   labels: Record<string, TraceLabel>,
   now: string,
 ): TraceRow[] {
-  if (toMonthCount(now) > AXIS.end * 12) {
-    throw new Error(`Build month ${now} is beyond the axis end ${AXIS.end}`);
-  }
+  const axis = axisFor(now);
   const rows: TraceRow[] = [];
   const oldestFirstCompanies = [...data.workExperience].sort((a, b) =>
     a.period.start.localeCompare(b.period.start),
@@ -104,6 +106,7 @@ export function buildTraceRows(
         },
         findLabel(labels, company.company),
         now,
+        axis,
       ),
     );
     const oldestFirst = [...roles].sort((a, b) => a.period.start.localeCompare(b.period.start));
@@ -123,6 +126,7 @@ export function buildTraceRows(
           },
           findLabel(labels, role.project),
           now,
+          axis,
         ),
       );
     }
@@ -134,8 +138,8 @@ export function formatPeriod(start: string, end: string | null, presentLabel: st
   return `${start.replace('-', '.')} – ${end === null ? presentLabel : end.replace('-', '.')}`;
 }
 
-export function axisTicks(step: number): number[] {
+export function axisTicks(axis: Axis, step: number): number[] {
   const ticks: number[] = [];
-  for (let year = AXIS.start; year < AXIS.end; year += step) ticks.push(year);
+  for (let year = axis.start; year < axis.end; year += step) ticks.push(year);
   return ticks;
 }

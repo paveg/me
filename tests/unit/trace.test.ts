@@ -2,6 +2,7 @@ import { expect, test } from 'vitest';
 import { getContent } from '../../src/data/index';
 import { siteCopy } from '../../src/data/site';
 import {
+  axisFor,
   axisTicks,
   buildTraceRows,
   endPercent,
@@ -11,9 +12,21 @@ import {
   toYearFraction,
 } from '../../src/lib/trace';
 
+const axis2026 = axisFor('2026-11');
+
+test('軸の右端はビルド月の翌年', () => {
+  expect(axis2026).toEqual({ start: 2015, end: 2027 });
+  expect(axisFor('2026-12').end).toBe(2027);
+  expect(axisFor('2027-01').end).toBe(2028);
+});
+
+test('書式違反のビルド月では軸を作れない', () => {
+  expect(() => axisFor('2027/01')).toThrow('Invalid period: 2027/01');
+});
+
 test('位置は軸の範囲に対する割合', () => {
-  expect(positionPercent('2015-01')).toBe(0);
-  expect(positionPercent('2021-01')).toBe(50);
+  expect(positionPercent('2015-01', axis2026)).toBe(0);
+  expect(positionPercent('2021-01', axis2026)).toBe(50);
 });
 
 test('書式違反の期間はエラーにする', () => {
@@ -43,14 +56,15 @@ test('現職の行は開いたスパンで、渡したnowの月の終わりま�
   const rows = buildTraceRows(getContent('ja').profile, siteCopy.ja.traceLabels, '2026-11');
   const current = rows.filter((r) => r.isOpen);
   expect(current).toHaveLength(2);
-  for (const row of current) expect(row.left + row.width).toBeCloseTo(endPercent('2026-11'));
+  for (const row of current)
+    expect(row.left + row.width).toBeCloseTo(endPercent('2026-11', axis2026));
 });
 
 test('バーの右端は終了月の終わり', () => {
-  expect(endPercent('2020-12')).toBe(positionPercent('2021-01'));
+  expect(endPercent('2020-12', axis2026)).toBe(positionPercent('2021-01', axis2026));
   const rows = buildTraceRows(getContent('ja').profile, siteCopy.ja.traceLabels, '2026-11');
   for (const row of rows)
-    expect(row.left + row.width).toBeCloseTo(endPercent(row.end ?? '2026-11'));
+    expect(row.left + row.width).toBeCloseTo(endPercent(row.end ?? '2026-11', axis2026));
 });
 
 test('長さは両端の月を含めて数える', () => {
@@ -78,12 +92,21 @@ test('各行に長さが入る', () => {
   ]);
 });
 
-test('ビルドの月が軸の右端を越えたらエラーにする', () => {
+test('ビルド月が2027-01でも、現職の行の右端は軸の中に収まる', () => {
   const profile = getContent('ja').profile;
-  expect(() => buildTraceRows(profile, siteCopy.ja.traceLabels, '2026-12')).not.toThrow();
-  expect(() => buildTraceRows(profile, siteCopy.ja.traceLabels, '2027-01')).toThrow(
-    'Build month 2027-01 is beyond the axis end 2027',
-  );
+  const axis = axisFor('2027-01');
+  const rows = buildTraceRows(profile, siteCopy.ja.traceLabels, '2027-01');
+  const current = rows.filter((r) => r.isOpen);
+  expect(current).toHaveLength(2);
+  for (const row of current) {
+    expect(row.left + row.width).toBeCloseTo(endPercent('2027-01', axis));
+    expect(row.left + row.width).toBeLessThan(100);
+  }
+});
+
+test('ビルド月が2026-12なら、現職の行の右端は軸の右端に届く', () => {
+  const rows = buildTraceRows(getContent('ja').profile, siteCopy.ja.traceLabels, '2026-12');
+  for (const row of rows.filter((r) => r.isOpen)) expect(row.left + row.width).toBeCloseTo(100);
 });
 
 test('期間の表示', () => {
@@ -92,8 +115,9 @@ test('期間の表示', () => {
 });
 
 test('目盛り', () => {
-  expect(axisTicks(2)).toEqual([2015, 2017, 2019, 2021, 2023, 2025]);
-  expect(axisTicks(4)).toEqual([2015, 2019, 2023]);
+  expect(axisTicks(axis2026, 2)).toEqual([2015, 2017, 2019, 2021, 2023, 2025]);
+  expect(axisTicks(axis2026, 4)).toEqual([2015, 2019, 2023]);
+  expect(axisTicks(axisFor('2027-01'), 2)).toEqual([2015, 2017, 2019, 2021, 2023, 2025, 2027]);
 });
 
 test('ビルド月はYYYY-MM形式でdefineから埋め込まれる', () => {
