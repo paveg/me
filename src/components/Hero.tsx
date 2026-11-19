@@ -11,9 +11,9 @@ const languages = [
 ] as const;
 
 const socialLinks = [
-  { icon: 'github', label: 'GitHub', href: contacts.github },
-  { icon: 'x', label: 'X', href: contacts.x },
-  { icon: 'linkedin', label: 'LinkedIn', href: contacts.linkedin },
+  { icon: 'github', label: 'GitHub', href: contacts.github, isIconOnly: false },
+  { icon: 'x', label: 'X', href: contacts.x, isIconOnly: true },
+  { icon: 'linkedin', label: 'LinkedIn', href: contacts.linkedin, isIconOnly: false },
 ] as const;
 
 const splitAfterCommas = (line: string) => line.split(/(?<=、)/);
@@ -63,9 +63,14 @@ export function Hero({
           {copy.ui.emailCta}
         </a>
         {socialLinks.map((link) => (
-          <a key={link.label} className="social" href={link.href}>
+          <a
+            key={link.label}
+            className="social"
+            href={link.href}
+            aria-label={link.isIconOnly ? link.label : undefined}
+          >
             <Icon name={link.icon} />
-            {link.label}
+            {!link.isIconOnly && link.label}
           </a>
         ))}
       </div>
