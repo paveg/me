@@ -13,7 +13,10 @@ export type SiteCopy = {
   footerEducation: string;
   footerBuiltWith: string;
   sourceUrl: string;
-  ui: Record<'emailCta' | 'offersHeading' | 'present' | 'switchLanguage', string>;
+  ui: Record<
+    'emailCta' | 'offersHeading' | 'present' | 'switchLanguage' | 'sourceCode' | 'traceHeading',
+    string
+  >;
 };
 
 export const contacts = {
@@ -83,6 +86,8 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       offersHeading: '頼めること',
       present: '現在',
       switchLanguage: 'English',
+      sourceCode: 'ソースコード',
+      traceHeading: '経歴',
     },
   },
   en: {
@@ -157,6 +162,8 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       offersHeading: 'What I can help with',
       present: 'Present',
       switchLanguage: '日本語',
+      sourceCode: 'Source code',
+      traceHeading: 'Career',
     },
   },
 };

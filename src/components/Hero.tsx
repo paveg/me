@@ -1,0 +1,46 @@
+import { Fragment } from 'react';
+import { contacts, type SiteCopy } from '../data/site';
+import type { Profile } from '../data/types';
+import { Icon } from './Icon';
+
+const socialLinks = [
+  { icon: 'github', label: 'GitHub', href: contacts.github },
+  { icon: 'x', label: 'X', href: contacts.x },
+  { icon: 'linkedin', label: 'LinkedIn', href: contacts.linkedin },
+] as const;
+
+const splitAfterCommas = (line: string) => line.split(/(?<=、)/);
+
+export function Hero({ profile, copy }: { profile: Profile; copy: SiteCopy }) {
+  return (
+    <header className="hero">
+      <div className="name-row">
+        <img className="avatar" src="/profile.jpg" alt="" width="96" height="96" />
+        <h1 className="name">{profile.name}</h1>
+      </div>
+      <p className="title">{copy.title}</p>
+      <p className="pitch">
+        {copy.pitch.map((line, index) => (
+          <Fragment key={line}>
+            {index > 0 && <br />}
+            {splitAfterCommas(line).map((phrase) => (
+              <span key={phrase}>{phrase}</span>
+            ))}
+          </Fragment>
+        ))}
+      </p>
+      <div className="contact-row">
+        <a className="button" href={`mailto:${contacts.email}`}>
+          <Icon name="mail" />
+          {copy.ui.emailCta}
+        </a>
+        {socialLinks.map((link) => (
+          <a key={link.label} className="social" href={link.href}>
+            <Icon name={link.icon} />
+            {link.label}
+          </a>
+        ))}
+      </div>
+    </header>
+  );
+}
