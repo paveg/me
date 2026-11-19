@@ -1,3 +1,4 @@
+import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 
 // クライアントのモジュールはload後に動き、インラインのスタイルを同期的に書き込む
@@ -32,6 +33,11 @@ const countAnimatedInlineStyles = (page: Page) =>
         ).length,
     );
 
+const waitForAnimationToSettle = async (page: Page) => {
+  await expect.poll(() => countAnimatedInlineStyles(page), { timeout: 5000 }).toBeGreaterThan(0);
+  await expect.poll(() => countAnimatedInlineStyles(page), { timeout: 10_000 }).toBe(0);
+};
+
 test('reduced-motionではバーが最初から最終状態', async ({ browser }) => {
   const page = await (await browser.newContext({ reducedMotion: 'reduce' })).newPage();
   await page.goto('/');
@@ -59,8 +65,7 @@ test('アニメーション後、バーは最終状態に落ち着く', async ({
 
 test('アニメーション後、フェードのインラインのスタイルも残らない', async ({ page }) => {
   await page.goto('/');
-  await expect.poll(() => countAnimatedInlineStyles(page), { timeout: 5000 }).toBeGreaterThan(0);
-  await expect.poll(() => countAnimatedInlineStyles(page), { timeout: 10_000 }).toBe(0);
+  await waitForAnimationToSettle(page);
   await expect(page.locator('.playhead')).toHaveCount(0);
 });
 
@@ -93,4 +98,67 @@ test('コンソールにエラーが出ない', async ({ page }) => {
   await page.goto('/');
   await page.goto('/en/');
   expect(errors).toEqual([]);
+});
+
+for (const path of ['/', '/en/']) {
+  test(`${path}: axeの違反がゼロ`, async ({ page }) => {
+    await page.goto(path);
+    await waitForAnimationToSettle(page);
+    expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  });
+}
+
+test('モバイルでリンクとボタンのタップ領域が44px以上、文字は13px以上', async ({ browser }) => {
+  const page = await (
+    await browser.newContext({ viewport: { width: 390, height: 844 } })
+  ).newPage();
+  await page.goto('/');
+  const small = await page
+    .locator('a, button, summary')
+    .evaluateAll((els) =>
+      els.filter((el) => el.getBoundingClientRect().height < 44).map((el) => el.textContent),
+    );
+  expect(small).toEqual([]);
+  const tinyText = await page
+    .locator('body *')
+    .evaluateAll((els) =>
+      els
+        .filter(
+          (el) =>
+            el.childNodes[0]?.nodeType === 3 && parseFloat(getComputedStyle(el).fontSize) < 13,
+        )
+        .map((el) => el.textContent),
+    );
+  expect(tinyText).toEqual([]);
+});
+
+test('トレースの行はTabで届き、Enterで開きSpaceで閉じ、フォーカスが見える', async ({ page }) => {
+  await page.goto('/');
+  const summary = page.locator('.trace-row summary').first();
+  const isFocused = () => summary.evaluate((el) => el === document.activeElement);
+  for (let presses = 0; presses < 30 && !(await isFocused()); presses++) {
+    await page.keyboard.press('Tab');
+  }
+  expect(await isFocused()).toBe(true);
+
+  const outline = await summary.evaluate((el) => {
+    const { outlineStyle, outlineWidth } = getComputedStyle(el);
+    return { outlineStyle, outlineWidth };
+  });
+  expect(outline).toEqual({ outlineStyle: 'solid', outlineWidth: '2px' });
+
+  const row = page.locator('.trace-row').first();
+  await page.keyboard.press('Enter');
+  await expect(row).toHaveAttribute('open', '');
+  await expect.poll(() => row.locator('.detail').evaluate((el) => el.style.cssText)).toBe('');
+  await page.keyboard.press('Space');
+  await expect(row).not.toHaveAttribute('open');
+});
+
+test('横スクロールが出ない', async ({ browser }) => {
+  const page = await (
+    await browser.newContext({ viewport: { width: 360, height: 800 } })
+  ).newPage();
+  await page.goto('/');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(360);
 });
