@@ -1,0 +1,563 @@
+# Portfolio profile data (English) - Updated: 2026-11-17
+profile:
+  name: Ryota Ikezawa
+  title: Site Reliability Engineer / Platform Engineer / Tech Lead
+  summary: |
+    SRE / Tech Lead specializing in platform engineering and developer experience.
+    Joined freee K.K. in November 2015, when the company had about 100 employees, and spent the following growth years as an engineer.
+    Started with data aggregation feature development, then expanded through SWE roles — tech lead, EM, and architect.
+    Led legacy system remodeling, microservice design, and multi-tenant data isolation boundary design.
+    Volunteered for an EM role for about two years in total, then returned to the TL/IC track to take responsibility for technology rather than people.
+    Continuous experience leading and delivering within globally distributed teams (Japan / Philippines).
+    After serving as architect on the HR/Payroll Integration Platform, transferred to the Orchestration team in June 2026; the team was renamed the DX Team (Developer Experience) in July 2026.
+    Currently an SRE tech lead on the DX Team, working on platform engineering.
+    Core stack: Go, TypeScript, Ruby, Rails, React, Kubernetes, Karpenter, gRPC, MySQL, ArgoCD, Datadog.
+  avatar: /profile.jpg
+
+workExperience:
+  # === freee K.K. ===
+  - company: freee K.K.
+    role: Site Reliability Engineer / Platform Engineer / Tech Lead
+    period:
+      start: '2015-11'
+      end: null
+    description: |
+      At freee K.K., a cloud accounting software provider, since November 2015, joining when the company had about 100 employees and spending the following growth years as an engineer.
+      Started with data aggregation feature development, progressed through Tech Lead,
+      Engineering Manager, and Architect roles, currently serving as SRE Tech Lead.
+      Continuously involved in hiring and incident response.
+      Leveraging tenure from early stage, contributed to multiple existing-system remodeling and re-architecture efforts.
+    technologies:
+      - Ruby
+      - Rails
+      - TypeScript
+      - React
+      - Go
+      - MySQL
+      - AWS
+      - Docker
+      - Kubernetes
+    roles:
+      - role: Site Reliability Engineer / Tech Lead
+        period:
+          start: '2026-06'
+          end: null
+        project: DX Team (Developer Experience)
+        description: |
+          Transferred to the Orchestration team in June 2026; the team was renamed the DX Team (Developer Experience) in July 2026.
+          The DX Team looks after the internal platform while improving developer productivity across the company.
+          Currently serving as SRE tech lead on platform engineering, mainly responsible for Kubernetes / Istio / Karpenter / CI/CD / containers (EKS + Terraform).
+          Focused on observability and self-service-driven developer experience across the container infrastructure and networking,
+          including work that improves how development is done, such as CI/CD improvements.
+        technologies:
+          - Kubernetes
+          - Istio
+          - Karpenter
+          - ArgoCD
+          - KEDA
+          - Fluentd
+          - Terraform
+          - AWS
+          - GitOps
+
+      - role: Senior Software Engineer / Architect
+        period:
+          start: '2025-01'
+          end: '2026-05'
+        project: HR/Payroll Integration Platform
+        description: |
+          Led the team as EM during the launch phase (first ~6 months), then moved to the Architect/IC track.
+          Main focus: gRPC API redesign and re-delineation of application responsibility boundaries. Drove master data decomposition and microservice design across a multi-product environment.
+          Cross-team coordination with feature owners, auth platform, and QA teams.
+        star:
+          - situation: |
+              In a multi-product environment, master data and authorization management needed to be
+              extracted into a foundation usable across products. The information spanned multiple
+              features, requiring coordination with feature owner teams.
+            task: |
+              As Architect, led domain boundary definition, technical strategy and roadmap planning.
+              Drove consensus building across auth platform team, feature owner teams, QA team, and business stakeholders.
+            action: |
+              Defined domain boundaries collaboratively with PdM, determining decomposition units based on data usage patterns.
+              Considering business constraints (cost/ROI), selected a pragmatic architecture of logical vertical partitioning
+              with transaction isolation. Re-planned roadmap multiple times in response to evolving feature requirements.
+              Main focus: gRPC API redesign and re-delineation of application responsibility boundaries.
+              After transitioning from architect to implementation phase, took ownership of a specific microservice,
+              driving development and operations.
+              Also involved in ArgoCD GitOps deployment, cluster upgrade operations,
+              and ongoing observability operations with Datadog (APM / Logs / Infra).
+            result: |
+              Established collaboration framework with feature owner teams and a technical strategy for incremental service decomposition, laying the groundwork for new feature development productivity.
+        technologies:
+          - Go
+          - Ruby
+          - Rails
+          - TypeScript
+          - React
+          - MySQL
+          - Kubernetes
+          - Docker
+          - Vite
+          - Datadog
+          - ArgoCD
+
+      - role: Engineering Manager / Tech Lead
+        period:
+          start: '2024-07'
+          end: '2024-12'
+        project: Employee Portal
+        description: |
+          Built a Japan/Philippines hybrid team (4 engineers + 2 QA) from scratch as a playing manager, writing 40-50% of the code to deliver release in 6 months alongside planning. Later managed onboarding of mobile app team (2) and contract developers (4), then handed off to a successor upon team transfer.
+          Drove Schema-driven development using OpenAPI Generator, Orval, and TanStack Query.
+        links:
+          - url: https://corp.freee.co.jp/news/0107freee_product.html
+            label: Employee Portal App Launch
+        technologies:
+          - Go
+          - Ruby
+          - Rails
+          - TypeScript
+          - React
+          - MySQL
+          - Kubernetes
+          - Docker
+          - Vite
+        star:
+          - situation: |
+              The existing freee HR product had an admin-focused UI that didn't prioritize employee experience.
+              Initiated the Employee Portal project to improve employee experience.
+              Also aimed to replace an external task request tool with an in-house solution.
+              Started as a brand new team with nothing defined.
+            task: |
+              As lead of a Japan/Philippines hybrid global team (4 engineers + 2 QA),
+              responsible for team operations, technical design/architecture, and project management.
+              Served as playing manager writing 40-50% of the code while leading technically.
+            action: |
+              Managed team operations in English while prioritizing delegation of responsibility and authority.
+              Delegated SLI/SLO definition to a team member, including SRE coordination, fostering team autonomy.
+              Drove Schema-driven development using OpenAPI Generator, Orval, and TanStack Query.
+            result: |
+              Delivered on schedule within 6 months from planning.
+              Achieved cost reduction through in-house replacement of external tools.
+              Established team quality metrics (SLI/SLO).
+
+      - role: Engineering Manager / Tech Lead
+        period:
+          start: '2023-04'
+          end: '2024-06'
+        project: freee Advisor Client Management
+        description: |
+          Client management service for tax accountants, a key customer segment, centered on remodeling the contract management data model.
+          Started with remodeling and closing down the legacy advisor service, then led through beta release as a playing manager in the global team.
+        links:
+          - url: https://corp.freee.co.jp/news/20231108freee_advisor.html
+            label: freee Advisor Beta Release
+        technologies:
+          - Go
+          - Ruby
+          - Rails
+          - TypeScript
+          - React
+          - MySQL
+          - Kubernetes
+          - Docker
+          - Vite
+        star:
+          - situation: |
+              freee Accounting managed contract relationships between business offices and tax accountant
+              firms via user status; a model that could correctly represent accountants with multiple
+              affiliations or contracts was needed. Building on a previously envisioned model, a cross-tenant
+              mechanism had to be introduced on the existing multi-tenant platform.
+            task: |
+              Designed a new data model placing a "contract" entity between business offices and accountant firms.
+              Ensured safe data migration in an environment where migration failure would directly lead to
+              serious impact. In a dual-lead team, responsible for technical design, project management,
+              and stakeholder coordination.
+            action: |
+              Assessed existing data and defined migration strategy, executing zero-downtime migration.
+              Provided technical leadership while coordinating with other teams and business units.
+              Drove Schema-driven frontend development using OpenAPI Generator, Orval, and TanStack Query.
+            result: |
+              Replaced the legacy advisor service, scaling to 1,000 tax accountants.
+              Completed a full rebuild of the legacy service, deprecating the legacy system while growing team members.
+
+      - role: Senior Software Engineer / Tech Lead
+        period:
+          start: '2022-07'
+          end: '2023-03'
+        project: freee Data Entry Service
+        description: |
+          Tech Lead for freee Data Entry Service (paper receipt → journal entry data) in the global team. Focused on domain design for Japan-specific tax processing, contributing to the official release in February 2023.
+        star:
+          - situation: |
+              The service required domain design for Japan-specific tax processing
+              (consumption tax categories, chart of accounts, etc.).
+              Working in a global team, Japan-specific tax domain knowledge needed to be communicated
+              to English-speaking team members.
+            task: |
+              Led domain design as Tech Lead, building an environment where the team could develop
+              with proper understanding of the tax domain.
+            action: |
+              Organized Japan-specific tax processing into domain models, driving design through
+              English discussion and knowledge sharing. Documented domain knowledge for team adoption.
+            result: |
+              Established development practices for Japan-specific domains in a 7-member global team, contributing to the official release in February 2023.
+        links:
+          - url: https://adv.freee.co.jp/service/receipt-data-entry
+            label: freee Data Entry Service
+          - url: https://corp.freee.co.jp/news/20230208d12n.secure.freee.html
+            label: Official Release Note
+        technologies:
+          - Go
+          - Ruby
+          - Rails
+          - TypeScript
+          - React
+          - MySQL
+          - Kubernetes
+          - Docker
+          - Vite
+
+      - role: Software Engineer / Tech Lead
+        period:
+          start: '2019-07'
+          end: '2022-06'
+        project: freee Financing / Offer-type Loan
+        description: |
+          Led the launch of freee Financing, an online financing platform, at the financial subsidiary (freee Finance Lab Inc.).
+          Also participated in development of the Offer-type Loan product, navigating specification misalignments with external financial institutions during integration.
+        star:
+          - situation: |
+              Participated in the Offer-type Loan product development at the financial subsidiary.
+              External financial institution integrations required compliance with institution-specific specifications,
+              while new products were in prototype and GTM validation phase.
+            task: |
+              Contributed to the development and validation cycles for both the platform and new products.
+              Drove specification alignment and implementation with external partners.
+            action: |
+              Worked through financial institution-specific specifications,
+              bridging misalignments with external partners through active communication.
+              For new products, participated in hypothesis testing via customer (GTM) validation.
+            result: |
+              Contributed to the foundational development of external financial institution integrations. Some new products were eventually closed based on service status, while accumulating 0→1 hypothesis-testing and external stakeholder coordination experience.
+        links:
+          - url: https://www.freee.co.jp/financing/
+            label: freee Financing
+          - url: https://www.freee.co.jp/financing/cash-flow/
+            label: Cash Flow Management Navi
+          - url: https://corp.freee.co.jp/news/business-loan-end.html
+            label: Offer-type Loan End / Integration into freee Financing
+        technologies:
+          - Ruby
+          - Rails
+          - TypeScript
+          - React
+          - MySQL
+          - Go
+          - AWS Lambda
+          - ECS
+          - Docker
+
+      - role: Software Engineer
+        period:
+          start: '2015-11'
+          end: '2019-06'
+        project: Data Aggregation Feature
+        description: |
+          Developed and operated transaction retrieval features via API integration with financial institutions.
+          Participated in multiple major bank integration projects as PjM and player, and joined the aggregation engine re-architecture project driving transition to a multi-layered architecture.
+        links:
+          - url: https://corp.freee.co.jp/news/freee-amex-api-8458.html
+            label: American Express API Integration
+          - url: https://corp.freee.co.jp/news/mufg-api-8934.html
+            label: MUFG Bank API Integration
+          - url: https://corp.freee.co.jp/news/shinkin-253-8950.html
+            label: Shinkin Bank API Integration
+          - url: https://corp.freee.co.jp/news/gmoaozora-api-9124.html
+            label: GMO Aozora Net Bank API Integration
+          - url: https://corp.freee.co.jp/news/jcb-freee-9159.html
+            label: JCB API Integration
+        technologies:
+          - Ruby
+          - Go
+          - Rails
+          - CoffeeScript
+          - MySQL
+          - Selenium WebDriver
+        star:
+          - situation: |
+              The data aggregation feature retrieved transactions from banks and credit card companies
+              via API integration and aggregation. Multiple API integration projects with major financial
+              institutions were running in parallel, and the aggregation engine was re-architected
+              to handle growing scale.
+            task: |
+              Participated as PjM and player in API integration projects (American Express, MUFG Bank,
+              Shinkin Banks, GMO Aozora Net Bank, JCB, etc.). Led domain abstraction for credit card
+              transactions and implemented key layers of the multi-layered architecture.
+            action: |
+              Managed projects while driving specification alignment and implementation with major financial institutions.
+              Designed and implemented data retrieval and persistence layers within the multi-layered architecture
+              (task kick → data retrieval → backup → retry → parsing → persistence).
+            result: |
+              Delivered API integrations with multiple major financial institutions, and improved maintainability and extensibility of the aggregation engine through multi-layered architecture migration.
+
+  # === Other Experience ===
+  - company: ACALL Inc.
+    role: Application Engineer (Contract)
+    period:
+      start: '2018-08'
+      end: '2019-04'
+    description: |
+      As a contractor, handled Rails framework upgrades,
+      dependency management, and migration from Paperclip to ActiveStorage.
+    technologies:
+      - Ruby
+      - Rails
+      - ActiveStorage
+
+  - company: Exetop Technology Inc.
+    role: Network Engineer
+    period:
+      start: '2015-04'
+      end: '2015-10'
+    description: |
+      Worked on infrastructure migration projects
+      from on-premises environments to AWS (public cloud).
+    technologies:
+      - AWS
+      - Linux
+      - On-premises Migration
+
+projects:
+  - name: hono-problem-details
+    type: oss
+    period:
+      start: '2026-01'
+      end: null
+    description: RFC 9457 Problem Details middleware for Hono.
+    techStack:
+      - Hono
+      - TypeScript
+    repository: https://github.com/paveg/hono-problem-details
+
+  - name: hono-cf-access
+    type: oss
+    period:
+      start: '2026-03'
+      end: null
+    description: |
+      Access control middleware for Hono leveraging Cloudflare Workers request.cf properties.
+    techStack:
+      - Hono
+      - TypeScript
+      - Cloudflare Workers
+    repository: https://github.com/paveg/hono-cf-access
+
+  - name: hono-webhook-verify
+    type: oss
+    period:
+      start: '2026-01'
+      end: null
+    description: |
+      Webhook signature verification middleware for Hono.
+      Supports Stripe, GitHub, Slack, Shopify, Twilio and custom providers.
+    techStack:
+      - Hono
+      - TypeScript
+    repository: https://github.com/paveg/hono-webhook-verify
+
+  - name: hono-idempotency
+    type: oss
+    period:
+      start: '2026-01'
+      end: null
+    description: Idempotency middleware for Hono. Prevents duplicate request execution.
+    techStack:
+      - Hono
+      - TypeScript
+    repository: https://github.com/paveg/hono-idempotency
+
+  - name: Tuck
+    type: personal
+    period:
+      start: '2025-01'
+      end: null
+    description: |
+      Read it later app. Efficiently search and organize saved content
+      with AI-powered semantic search and vector search.
+    techStack:
+      - React
+      - TypeScript
+      - Hono
+      - Cloudflare Workers
+      - Drizzle ORM
+      - Valibot
+    url: https://gettuck.app
+
+  - name: funailog
+    type: personal
+    period:
+      start: '2023-01'
+      end: null
+    description: Personal tech blog. Built with Astro and deployed to Cloudflare Workers.
+    techStack:
+      - Astro
+      - React
+      - TypeScript
+      - Tailwind CSS
+      - Cloudflare Workers
+    url: https://funailog.com
+    repository: https://github.com/paveg/funailog
+
+  - name: devcard
+    type: personal
+    period:
+      start: '2025-12'
+      end: null
+    description: |
+      Web app for generating developer cards from GitHub profiles.
+      Also usable as OGP images.
+    techStack:
+      - Hono
+      - TypeScript
+      - Cloudflare Workers
+    url: https://devcard.pavegy.workers.dev/
+    repository: https://github.com/paveg/devcard
+
+  - name: DailyDose
+    type: personal
+    period:
+      start: '2024-01'
+      end: null
+    description: |
+      Supplement management app with barcode scanning,
+      AI-powered intake timing suggestions, and reminder features.
+    techStack:
+      - React
+      - TypeScript
+      - Cloudflare Workers
+      - PWA
+    url: https://daily-dose.pavegy.workers.dev
+
+  - name: Attain
+    type: personal
+    period:
+      start: '2024-01'
+      end: null
+    description: |
+      A data-driven fitness tracking app.
+      Optimize training with AI coaching.
+    techStack:
+      - React
+      - TypeScript
+      - iOS
+      - Android
+    url: https://attain-app.com/lp
+
+  - name: dots
+    type: personal
+    period:
+      start: '2020-01'
+      end: null
+    description: Personal development environment configuration managed with chezmoi.
+    techStack:
+      - chezmoi
+      - Neovim
+      - Lua
+      - Zsh
+    repository: https://github.com/paveg/dots
+
+  - name: BIBGEN
+    type: personal
+    period:
+      start: '2024-01'
+      end: null
+    description: |
+      A web app for easily generating and printing bib numbers
+      for motorcycle races like motocross and enduro.
+    techStack:
+      - Next.js
+      - React
+      - TypeScript
+      - Vercel
+    url: https://bibgen.vercel.app/
+
+skills:
+  - category: Programming Languages
+    items:
+      - name: Go
+        level: advanced
+        yearsOfExperience: 3
+      - name: TypeScript
+        level: expert
+        yearsOfExperience: 5
+      - name: Ruby
+        level: expert
+        yearsOfExperience: 8
+      - name: Python
+        level: intermediate
+        yearsOfExperience: 2
+
+  - category: Frontend
+    items:
+      - name: React
+        level: expert
+        yearsOfExperience: 5
+      - name: Next.js
+        level: advanced
+        yearsOfExperience: 3
+      - name: Astro
+        level: advanced
+        yearsOfExperience: 2
+
+  - category: Frameworks & Runtime
+    items:
+      - name: Ruby on Rails
+        level: expert
+        yearsOfExperience: 8
+      - name: Hono
+        level: advanced
+        yearsOfExperience: 1
+      - name: Node.js
+        level: advanced
+        yearsOfExperience: 4
+
+  - category: Databases
+    items:
+      - name: MySQL
+        level: advanced
+        yearsOfExperience: 8
+      - name: PostgreSQL
+        level: intermediate
+        yearsOfExperience: 3
+
+  - category: Infrastructure & Tooling
+    items:
+      - name: Kubernetes
+        level: advanced
+        yearsOfExperience: 4
+      - name: Docker
+        level: advanced
+        yearsOfExperience: 5
+      - name: ArgoCD
+      - name: Datadog
+      - name: gRPC
+      - name: Istio
+      - name: KEDA
+      - name: Fluentd
+      - name: Karpenter
+      - name: Terraform
+      - name: AWS
+        level: intermediate
+        yearsOfExperience: 5
+      - name: Cloudflare Workers
+        level: advanced
+        yearsOfExperience: 2
+
+education:
+  - institution: Senshu University
+    degree: Bachelor of Law
+    field: Political Science
+    period:
+      start: '2011-04'
+      end: '2015-03'
