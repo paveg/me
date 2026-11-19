@@ -55,9 +55,15 @@ if (missing.length > 0) {
   process.exit(1);
 }
 
+// noLayoutClosureはGSUBで置き換わる先のグリフを外すので、fi・flの合字は文字コードで残す
+const LIGATURES = 'ﬁﬂ';
+
 const fontsDir = resolve(clientDir, 'fonts');
 mkdirSync(fontsDir, { recursive: true });
 for (const { weight, ttf } of fonts) {
-  const woff2 = await subsetFont(ttf, text, { targetFormat: 'woff2' });
+  const woff2 = await subsetFont(ttf, `${text}${LIGATURES}`, {
+    targetFormat: 'woff2',
+    noLayoutClosure: true,
+  });
   writeFileSync(resolve(fontsDir, `line-seed-jp-${weight}.woff2`), woff2);
 }
