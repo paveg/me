@@ -1,3 +1,4 @@
+import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 
 // クライアントのモジュールはload後に動き、インラインのスタイルを同期的に書き込む
@@ -93,4 +94,53 @@ test('コンソールにエラーが出ない', async ({ page }) => {
   await page.goto('/');
   await page.goto('/en/');
   expect(errors).toEqual([]);
+});
+
+for (const path of ['/', '/en/']) {
+  test(`${path}: axeの違反がゼロ`, async ({ page }) => {
+    await page.goto(path);
+    await expect.poll(() => countAnimatedInlineStyles(page), { timeout: 10_000 }).toBe(0);
+    expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  });
+}
+
+test('モバイルでリンクとボタンのタップ領域が44px以上、文字は13px以上', async ({ browser }) => {
+  const page = await (
+    await browser.newContext({ viewport: { width: 390, height: 844 } })
+  ).newPage();
+  await page.goto('/');
+  const small = await page
+    .locator('a, button, summary')
+    .evaluateAll((els) =>
+      els.filter((el) => el.getBoundingClientRect().height < 44).map((el) => el.textContent),
+    );
+  expect(small).toEqual([]);
+  const tinyText = await page
+    .locator('body *')
+    .evaluateAll((els) =>
+      els
+        .filter(
+          (el) =>
+            el.childNodes[0]?.nodeType === 3 && parseFloat(getComputedStyle(el).fontSize) < 13,
+        )
+        .map((el) => el.textContent),
+    );
+  expect(tinyText).toEqual([]);
+});
+
+test('トレースの行はキーボードで開閉でき、フォーカスが見える', async ({ page }) => {
+  await page.goto('/');
+  const summary = page.locator('.trace-row summary').first();
+  await summary.focus();
+  expect(await summary.evaluate((el) => getComputedStyle(el).outlineStyle)).not.toBe('none');
+  await page.keyboard.press('Enter');
+  await expect(page.locator('.trace-row').first()).toHaveAttribute('open', '');
+});
+
+test('横スクロールが出ない', async ({ browser }) => {
+  const page = await (
+    await browser.newContext({ viewport: { width: 360, height: 800 } })
+  ).newPage();
+  await page.goto('/');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(360);
 });
