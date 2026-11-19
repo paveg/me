@@ -107,3 +107,14 @@ test('ヒーローのXのリンクはアイコンだけで、名前はaria-label
   expect(xLink?.[0]).toContain('aria-label="X"');
   expect(xLink?.[1]?.replace(/<svg[\s\S]*?<\/svg>/g, '')).toBe('');
 });
+
+test('フッターのソースへのリンクはGitHubのアイコンとリポジトリのパスを出す', () => {
+  for (const html of [ja, en]) {
+    const footer = html.slice(html.indexOf('<footer'));
+    expect(footer).toContain(
+      '<a class="social" href="https://github.com/paveg/me"><svg class="icon" aria-hidden="true"><use href="#i-github"></use></svg>paveg/me</a>',
+    );
+  }
+  expect(ja).not.toContain('ソースコード');
+  expect(en).not.toContain('Source code');
+});

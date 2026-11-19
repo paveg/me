@@ -548,17 +548,20 @@ h2 {
 }
 
 footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1rem 2rem;
   margin-top: 4rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--rule);
   font-size: 0.875rem;
   color: var(--muted);
 }
 
 footer p {
   margin: 0;
-}
-
-footer a {
-  margin-left: 0.5em;
 }
 
 @media (prefers-reduced-motion: reduce) {
