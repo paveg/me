@@ -66,7 +66,8 @@ export function Trace({
   const gridStep = `${((TICK_STEP_YEARS / (axis.end - axis.start)) * 100).toFixed(2)}%`;
   const traceStyle: CustomProperties = { '--now': nowPercent, '--grid-step': gridStep };
   return (
-    <section className="trace" aria-label={copy.ui.traceHeading} style={traceStyle}>
+    <section className="trace" aria-labelledby="trace-heading" style={traceStyle}>
+      <h2 id="trace-heading">{copy.ui.traceHeading}</h2>
       <p className="trace-hint">{copy.traceHint}</p>
       <div className="axis" aria-hidden="true">
         <div className="ticks">

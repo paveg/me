@@ -14,13 +14,7 @@ export type SiteCopy = {
   footerBuiltWith: string;
   sourceUrl: string;
   ui: Record<
-    | 'emailCta'
-    | 'offersHeading'
-    | 'present'
-    | 'now'
-    | 'switchLanguage'
-    | 'sourceCode'
-    | 'traceHeading',
+    'emailCta' | 'offersHeading' | 'present' | 'now' | 'switchLanguage' | 'traceHeading',
     string
   >;
 };
@@ -93,7 +87,6 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       present: '現在',
       now: '現在',
       switchLanguage: 'English',
-      sourceCode: 'ソースコード',
       traceHeading: '経歴',
     },
   },
@@ -170,7 +163,6 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       present: 'Present',
       now: 'Now',
       switchLanguage: '日本語',
-      sourceCode: 'Source code',
       traceHeading: 'Career',
     },
   },

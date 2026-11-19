@@ -50,9 +50,13 @@ test('英語版は英語の価値提案を出す', () => {
   expect(en).toContain('From product design to the platform it runs on.');
 });
 
-test('トレースの節に見出しの名前を付ける', () => {
-  expect(ja).toContain('<section class="trace" aria-label="経歴"');
-  expect(en).toContain('<section class="trace" aria-label="Career"');
+test('トレースの節に見出しを出し、節の名前にする', () => {
+  expect(ja).toMatch(
+    /<section class="trace" aria-labelledby="trace-heading"[^>]*><h2 id="trace-heading">経歴<\/h2><p class="trace-hint"/,
+  );
+  expect(en).toMatch(
+    /<section class="trace" aria-labelledby="trace-heading"[^>]*><h2 id="trace-heading">Career<\/h2><p class="trace-hint"/,
+  );
 });
 
 test('印刷用のスタイルが閉じた<details>の中身を出す', () => {
@@ -102,4 +106,15 @@ test('ヒーローのXのリンクはアイコンだけで、名前はaria-label
   );
   expect(xLink?.[0]).toContain('aria-label="X"');
   expect(xLink?.[1]?.replace(/<svg[\s\S]*?<\/svg>/g, '')).toBe('');
+});
+
+test('フッターのソースへのリンクはGitHubのアイコンとリポジトリのパスを出す', () => {
+  for (const html of [ja, en]) {
+    const footer = html.slice(html.indexOf('<footer'));
+    expect(footer).toContain(
+      '<a class="social" href="https://github.com/paveg/me"><svg class="icon" aria-hidden="true"><use href="#i-github"></use></svg>paveg/me</a>',
+    );
+  }
+  expect(ja).not.toContain('ソースコード');
+  expect(en).not.toContain('Source code');
 });
