@@ -99,7 +99,7 @@ summary:focus-visible {
 }
 
 .hero {
-  padding: 4rem 0 3rem;
+  padding: 4rem 0 0;
 }
 
 .name-row {
@@ -174,7 +174,6 @@ summary:focus-visible {
 
 .trace {
   position: relative;
-  margin-top: 1rem;
 }
 
 .playhead {
@@ -586,7 +585,7 @@ footer a {
   }
 
   .hero {
-    padding: 2.5rem 0 2rem;
+    padding: 2.5rem 0 0;
   }
 
   h2 {
