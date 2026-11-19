@@ -2,25 +2,41 @@ import { expect, test } from 'vitest';
 import { getContent } from '../../src/data/index';
 import { siteCopy } from '../../src/data/site';
 import {
+  axisFor,
   axisTicks,
   buildTraceRows,
+  endPercent,
+  formatDuration,
   formatPeriod,
   positionPercent,
   toYearFraction,
 } from '../../src/lib/trace';
 
+const axis2026 = axisFor('2026-11');
+
+test('軸の右端はビルド月の翌年', () => {
+  expect(axis2026).toEqual({ start: 2015, end: 2027 });
+  expect(axisFor('2026-12').end).toBe(2027);
+  expect(axisFor('2027-01').end).toBe(2028);
+});
+
+test('書式違反のビルド月では軸を作れない', () => {
+  expect(() => axisFor('2027/01')).toThrow('Invalid period: 2027/01');
+});
+
 test('位置は軸の範囲に対する割合', () => {
-  expect(positionPercent('2015-01')).toBe(0);
-  expect(positionPercent('2021-01')).toBe(50);
+  expect(positionPercent('2015-01', axis2026)).toBe(0);
+  expect(positionPercent('2021-01', axis2026)).toBe(50);
 });
 
 test('書式違反の期間はエラーにする', () => {
   expect(() => toYearFraction('2019/07')).toThrow('Invalid period: 2019/07');
 });
 
-test('行の並びと種類', () => {
+test('行の並びは会社の開始順で、役割は会社の直後', () => {
   const rows = buildTraceRows(getContent('ja').profile, siteCopy.ja.traceLabels, '2026-11');
   expect(rows.map((r) => r.kind)).toEqual([
+    'other',
     'parent',
     'child',
     'child',
@@ -30,16 +46,67 @@ test('行の並びと種類', () => {
     'child',
     'child',
     'other',
-    'other',
   ]);
-  expect(rows[1]?.label).toBe('Software Engineer');
+  expect(rows[0]?.label).toBe('エクストップテクノロジー');
+  expect(rows[2]?.label).toBe('Software Engineer');
+  expect(rows[9]?.label).toBe('ACALL');
 });
 
-test('現職の行は開いたスパンで、渡したnowまで伸びる', () => {
+test('現職の行は開いたスパンで、渡したnowの月の終わりまで伸びる', () => {
   const rows = buildTraceRows(getContent('ja').profile, siteCopy.ja.traceLabels, '2026-11');
   const current = rows.filter((r) => r.isOpen);
   expect(current).toHaveLength(2);
-  for (const row of current) expect(row.left + row.width).toBeCloseTo(positionPercent('2026-11'));
+  for (const row of current)
+    expect(row.left + row.width).toBeCloseTo(endPercent('2026-11', axis2026));
+});
+
+test('バーの右端は終了月の終わり', () => {
+  expect(endPercent('2020-12', axis2026)).toBe(positionPercent('2021-01', axis2026));
+  const rows = buildTraceRows(getContent('ja').profile, siteCopy.ja.traceLabels, '2026-11');
+  for (const row of rows)
+    expect(row.left + row.width).toBeCloseTo(endPercent(row.end ?? '2026-11', axis2026));
+});
+
+test('長さは両端の月を含めて数える', () => {
+  expect(formatDuration('2015-04', '2015-10', '2026-11')).toBe('7m');
+  expect(formatDuration('2015-11', '2019-06', '2026-11')).toBe('3y 8m');
+  expect(formatDuration('2019-07', '2022-06', '2026-11')).toBe('3y');
+  expect(formatDuration('2015-11', null, '2026-11')).toBe('11y 1m');
+  expect(formatDuration('2020-05', '2020-05', '2026-11')).toBe('1m');
+  expect(formatDuration('2020-01', '2020-12', '2026-11')).toBe('1y');
+});
+
+test('各行に長さが入る', () => {
+  const rows = buildTraceRows(getContent('ja').profile, siteCopy.ja.traceLabels, '2026-11');
+  expect(rows.map((r) => r.duration)).toEqual([
+    '7m',
+    '11y 1m',
+    '3y 8m',
+    '3y',
+    '9m',
+    '1y 3m',
+    '6m',
+    '1y 5m',
+    '6m',
+    '9m',
+  ]);
+});
+
+test('ビルド月が2027-01でも、現職の行の右端は軸の中に収まる', () => {
+  const profile = getContent('ja').profile;
+  const axis = axisFor('2027-01');
+  const rows = buildTraceRows(profile, siteCopy.ja.traceLabels, '2027-01');
+  const current = rows.filter((r) => r.isOpen);
+  expect(current).toHaveLength(2);
+  for (const row of current) {
+    expect(row.left + row.width).toBeCloseTo(endPercent('2027-01', axis));
+    expect(row.left + row.width).toBeLessThan(100);
+  }
+});
+
+test('ビルド月が2026-12なら、現職の行の右端は軸の右端に届く', () => {
+  const rows = buildTraceRows(getContent('ja').profile, siteCopy.ja.traceLabels, '2026-12');
+  for (const row of rows.filter((r) => r.isOpen)) expect(row.left + row.width).toBeCloseTo(100);
 });
 
 test('期間の表示', () => {
@@ -48,8 +115,9 @@ test('期間の表示', () => {
 });
 
 test('目盛り', () => {
-  expect(axisTicks(2)).toEqual([2015, 2017, 2019, 2021, 2023, 2025]);
-  expect(axisTicks(4)).toEqual([2015, 2019, 2023]);
+  expect(axisTicks(axis2026, 2)).toEqual([2015, 2017, 2019, 2021, 2023, 2025]);
+  expect(axisTicks(axis2026, 4)).toEqual([2015, 2019, 2023]);
+  expect(axisTicks(axisFor('2027-01'), 2)).toEqual([2015, 2017, 2019, 2021, 2023, 2025, 2027]);
 });
 
 test('ビルド月はYYYY-MM形式でdefineから埋め込まれる', () => {
