@@ -33,6 +33,11 @@ const countAnimatedInlineStyles = (page: Page) =>
         ).length,
     );
 
+const waitForAnimationToSettle = async (page: Page) => {
+  await expect.poll(() => countAnimatedInlineStyles(page), { timeout: 5000 }).toBeGreaterThan(0);
+  await expect.poll(() => countAnimatedInlineStyles(page), { timeout: 10_000 }).toBe(0);
+};
+
 test('reduced-motionではバーが最初から最終状態', async ({ browser }) => {
   const page = await (await browser.newContext({ reducedMotion: 'reduce' })).newPage();
   await page.goto('/');
@@ -60,8 +65,7 @@ test('アニメーション後、バーは最終状態に落ち着く', async ({
 
 test('アニメーション後、フェードのインラインのスタイルも残らない', async ({ page }) => {
   await page.goto('/');
-  await expect.poll(() => countAnimatedInlineStyles(page), { timeout: 5000 }).toBeGreaterThan(0);
-  await expect.poll(() => countAnimatedInlineStyles(page), { timeout: 10_000 }).toBe(0);
+  await waitForAnimationToSettle(page);
   await expect(page.locator('.playhead')).toHaveCount(0);
 });
 
@@ -99,7 +103,7 @@ test('コンソールにエラーが出ない', async ({ page }) => {
 for (const path of ['/', '/en/']) {
   test(`${path}: axeの違反がゼロ`, async ({ page }) => {
     await page.goto(path);
-    await expect.poll(() => countAnimatedInlineStyles(page), { timeout: 10_000 }).toBe(0);
+    await waitForAnimationToSettle(page);
     expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
   });
 }
@@ -128,13 +132,27 @@ test('モバイルでリンクとボタンのタップ領域が44px以上、文�
   expect(tinyText).toEqual([]);
 });
 
-test('トレースの行はキーボードで開閉でき、フォーカスが見える', async ({ page }) => {
+test('トレースの行はTabで届き、Enterで開きSpaceで閉じ、フォーカスが見える', async ({ page }) => {
   await page.goto('/');
   const summary = page.locator('.trace-row summary').first();
-  await summary.focus();
-  expect(await summary.evaluate((el) => getComputedStyle(el).outlineStyle)).not.toBe('none');
+  const isFocused = () => summary.evaluate((el) => el === document.activeElement);
+  for (let presses = 0; presses < 30 && !(await isFocused()); presses++) {
+    await page.keyboard.press('Tab');
+  }
+  expect(await isFocused()).toBe(true);
+
+  const outline = await summary.evaluate((el) => {
+    const { outlineStyle, outlineWidth } = getComputedStyle(el);
+    return { outlineStyle, outlineWidth };
+  });
+  expect(outline).toEqual({ outlineStyle: 'solid', outlineWidth: '2px' });
+
+  const row = page.locator('.trace-row').first();
   await page.keyboard.press('Enter');
-  await expect(page.locator('.trace-row').first()).toHaveAttribute('open', '');
+  await expect(row).toHaveAttribute('open', '');
+  await expect.poll(() => row.locator('.detail').evaluate((el) => el.style.cssText)).toBe('');
+  await page.keyboard.press('Space');
+  await expect(row).not.toHaveAttribute('open');
 });
 
 test('横スクロールが出ない', async ({ browser }) => {
