@@ -1,3 +1,17 @@
+@font-face {
+  font-family: 'LINE Seed JP';
+  font-weight: 400;
+  font-display: optional;
+  src: url('/fonts/line-seed-jp-400.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'LINE Seed JP';
+  font-weight: 700;
+  font-display: optional;
+  src: url('/fonts/line-seed-jp-700.woff2') format('woff2');
+}
+
 :root {
   --paper: #fbfcfd;
   --ink: #1c2733;
