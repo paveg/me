@@ -69,6 +69,20 @@ summary:focus-visible {
   flex: none;
 }
 
+.lang {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+
+.lang [aria-current] {
+  color: var(--ink);
+  text-decoration: none;
+}
+
 .hero {
   padding: 4rem 0 3rem;
 }

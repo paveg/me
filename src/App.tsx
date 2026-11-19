@@ -15,7 +15,7 @@ export function App({ locale }: { locale: Locale }) {
     <>
       <IconSprite />
       <main className="page">
-        <Hero profile={profile.profile} copy={copy} />
+        <Hero profile={profile.profile} copy={copy} locale={locale} />
         <Trace profile={profile} copy={copy} locale={locale} />
         <Offers copy={copy} />
         <Work projects={profile.projects} locale={locale} />
