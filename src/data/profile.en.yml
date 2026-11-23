@@ -22,11 +22,11 @@ workExperience:
       start: '2015-11'
       end: null
     description: |
-      At freee K.K., a cloud accounting software provider, since November 2015, joining when the company had about 100 employees and spending the following growth years as an engineer.
+      Joined freee K.K., a cloud accounting software provider, in November 2015, when the company had about 100 employees, and spent the following growth years as an engineer.
       Started with data aggregation feature development, progressed through Tech Lead,
       Engineering Manager, and Architect roles, currently serving as SRE Tech Lead.
       Continuously involved in hiring and incident response.
-      Leveraging tenure from early stage, contributed to multiple existing-system remodeling and re-architecture efforts.
+      Drawing on experience since the early days, contributed to multiple remodeling and re-architecture efforts on existing systems.
     technologies:
       - Ruby
       - Rails
@@ -47,8 +47,7 @@ workExperience:
           Transferred to the Orchestration team in June 2026; the team was renamed the DX Team (Developer Experience) in July 2026.
           The DX Team looks after the internal platform while improving developer productivity across the company.
           Currently serving as SRE tech lead on platform engineering, mainly responsible for Kubernetes / Istio / Karpenter / CI/CD / containers (EKS + Terraform).
-          Focused on observability and self-service-driven developer experience across the container infrastructure and networking,
-          including work that improves how development is done, such as CI/CD improvements.
+          Focused on observability and self-service, improving developer experience across the container infrastructure, networking, and CI/CD.
         technologies:
           - Kubernetes
           - Istio
@@ -67,7 +66,7 @@ workExperience:
         project: HR/Payroll Integration Platform
         description: |
           Led the team as EM during the launch phase (first ~6 months), then moved to the Architect/IC track.
-          Main focus: gRPC API redesign and re-delineation of application responsibility boundaries. Drove master data decomposition and microservice design across a multi-product environment.
+          Main focus: gRPC API redesign and redefining application responsibility boundaries. Drove master data decomposition and microservice design across a multi-product environment.
           Cross-team coordination with feature owners, auth platform, and QA teams.
         star:
           - situation: |
@@ -78,10 +77,10 @@ workExperience:
               As Architect, led domain boundary definition, technical strategy and roadmap planning.
               Drove consensus building across auth platform team, feature owner teams, QA team, and business stakeholders.
             action: |
-              Defined domain boundaries collaboratively with PdM, determining decomposition units based on data usage patterns.
+              Defined domain boundaries collaboratively with the product manager, determining decomposition units based on data usage patterns.
               Considering business constraints (cost/ROI), selected a pragmatic architecture of logical vertical partitioning
               with transaction isolation. Re-planned roadmap multiple times in response to evolving feature requirements.
-              Main focus: gRPC API redesign and re-delineation of application responsibility boundaries.
+              Main focus: gRPC API redesign and redefining application responsibility boundaries.
               After transitioning from architect to implementation phase, took ownership of a specific microservice,
               driving development and operations.
               Also involved in ArgoCD GitOps deployment, cluster upgrade operations,
@@ -107,8 +106,8 @@ workExperience:
           end: '2024-12'
         project: Employee Portal
         description: |
-          Built a Japan/Philippines hybrid team (4 engineers + 2 QA) from scratch as a playing manager, writing 40-50% of the code to deliver release in 6 months alongside planning. Later managed onboarding of mobile app team (2) and contract developers (4), then handed off to a successor upon team transfer.
-          Drove Schema-driven development using OpenAPI Generator, Orval, and TanStack Query.
+          Built a Japan/Philippines hybrid team (4 engineers + 2 QA) from scratch as a hands-on manager, writing 40-50% of the code to deliver release in 6 months alongside planning. Later managed onboarding of mobile app team (2) and contract developers (4), then handed off to a successor upon team transfer.
+          Drove schema-driven development using OpenAPI Generator, Orval, and TanStack Query.
         links:
           - url: https://corp.freee.co.jp/news/0107freee_product.html
             label: Employee Portal App Launch
@@ -131,11 +130,11 @@ workExperience:
             task: |
               As lead of a Japan/Philippines hybrid global team (4 engineers + 2 QA),
               responsible for team operations, technical design/architecture, and project management.
-              Served as playing manager writing 40-50% of the code while leading technically.
+              Served as a hands-on manager writing 40-50% of the code while leading technically.
             action: |
               Managed team operations in English while prioritizing delegation of responsibility and authority.
               Delegated SLI/SLO definition to a team member, including SRE coordination, fostering team autonomy.
-              Drove Schema-driven development using OpenAPI Generator, Orval, and TanStack Query.
+              Drove schema-driven development using OpenAPI Generator, Orval, and TanStack Query.
             result: |
               Delivered on schedule within 6 months from planning.
               Achieved cost reduction through in-house replacement of external tools.
@@ -147,8 +146,8 @@ workExperience:
           end: '2024-06'
         project: freee Advisor Client Management
         description: |
-          Client management service for tax accountants, a key customer segment, centered on remodeling the contract management data model.
-          Started with remodeling and closing down the legacy advisor service, then led through beta release as a playing manager in the global team.
+          Worked on the client management service for tax accountants, a key customer segment, focusing on remodeling the contract management data model.
+          Started with remodeling and closing down the legacy advisor service, then led through beta release as a hands-on manager in the global team.
         links:
           - url: https://corp.freee.co.jp/news/20231108freee_advisor.html
             label: freee Advisor Beta Release
@@ -176,7 +175,7 @@ workExperience:
             action: |
               Assessed existing data and defined migration strategy, executing zero-downtime migration.
               Provided technical leadership while coordinating with other teams and business units.
-              Drove Schema-driven frontend development using OpenAPI Generator, Orval, and TanStack Query.
+              Drove schema-driven frontend development using OpenAPI Generator, Orval, and TanStack Query.
             result: |
               Replaced the legacy advisor service, scaling to 1,000 tax accountants.
               Completed a full rebuild of the legacy service, deprecating the legacy system while growing team members.
@@ -239,7 +238,7 @@ workExperience:
               bridging misalignments with external partners through active communication.
               For new products, participated in hypothesis testing via customer (GTM) validation.
             result: |
-              Contributed to the foundational development of external financial institution integrations. Some new products were eventually closed based on service status, while accumulating 0→1 hypothesis-testing and external stakeholder coordination experience.
+              Contributed to the foundational development of external financial institution integrations. Some new products were eventually discontinued, but the work built experience in 0-to-1 hypothesis testing and external stakeholder coordination.
         links:
           - url: https://www.freee.co.jp/financing/
             label: freee Financing
@@ -265,7 +264,7 @@ workExperience:
         project: Data Aggregation Feature
         description: |
           Developed and operated transaction retrieval features via API integration with financial institutions.
-          Participated in multiple major bank integration projects as PjM and player, and joined the aggregation engine re-architecture project driving transition to a multi-layered architecture.
+          Participated in multiple major bank integration projects as project manager and hands-on engineer, and joined the aggregation engine re-architecture project driving transition to a multi-layered architecture.
         links:
           - url: https://corp.freee.co.jp/news/freee-amex-api-8458.html
             label: American Express API Integration
@@ -291,13 +290,13 @@ workExperience:
               institutions were running in parallel, and the aggregation engine was re-architected
               to handle growing scale.
             task: |
-              Participated as PjM and player in API integration projects (American Express, MUFG Bank,
+              Participated as project manager and hands-on engineer in API integration projects (American Express, MUFG Bank,
               Shinkin Banks, GMO Aozora Net Bank, JCB, etc.). Led domain abstraction for credit card
               transactions and implemented key layers of the multi-layered architecture.
             action: |
               Managed projects while driving specification alignment and implementation with major financial institutions.
               Designed and implemented data retrieval and persistence layers within the multi-layered architecture
-              (task kick → data retrieval → backup → retry → parsing → persistence).
+              (task dispatch → data retrieval → backup → retry → parsing → persistence).
             result: |
               Delivered API integrations with multiple major financial institutions, and improved maintainability and extensibility of the aggregation engine through multi-layered architecture migration.
 
@@ -383,8 +382,8 @@ projects:
       start: '2025-01'
       end: null
     description: |
-      Read it later app. Efficiently search and organize saved content
-      with AI-powered semantic search and vector search.
+      Read-it-later app. Efficiently search and organize saved content
+      with AI-powered semantic and vector search.
     techStack:
       - React
       - TypeScript
@@ -416,7 +415,7 @@ projects:
       end: null
     description: |
       Web app for generating developer cards from GitHub profiles.
-      Also usable as OGP images.
+      Also usable as Open Graph (OG) images.
     techStack:
       - Hono
       - TypeScript
