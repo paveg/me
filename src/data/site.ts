@@ -38,7 +38,7 @@ export const siteCopy: Record<Locale, SiteCopy> = {
     offers: [
       {
         title: 'Kubernetes / EKS基盤とCI/CDの改善',
-        body: 'Karpenter・Istio・ArgoCDを使ったコンテナ基盤の運用と、デプロイの速さと安全性の改善。',
+        body: 'Karpenter・Istio・ArgoCDを使ったコンテナ基盤の運用と、デプロイの高速化と安全性の向上。',
       },
       {
         title: 'レガシーのリモデリングとAPI設計',
@@ -46,7 +46,7 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       },
       {
         title: 'Webアプリケーションの立ち上げ',
-        body: 'Claude Codeを開発の中心に据え、企画から公開までを短いサイクルで回します。Hono・React・Cloudflare Workersでの個人プロダクトを継続して立ち上げています。',
+        body: 'Claude Codeを開発の中心に据えた、企画から公開までの短いサイクル。Hono・React・Cloudflare Workersによる個人プロダクトの継続的な立ち上げ。',
       },
     ],
     traceHint: '各行を開くと、役割の詳細と使った技術が見られます。',
@@ -54,7 +54,7 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       freee株式会社: { label: 'freee', sub: 'クラウド会計・人事労務SaaS' },
       データ集約機能: { label: 'Software Engineer', sub: '銀行・カード会社とのAPI連携' },
       '資金調達freee / オファー型融資': { label: 'Tech Lead', sub: '融資サービスの立ち上げ' },
-      freeeデータ化サービス: { label: 'Tech Lead', sub: '紙の証憑を仕訳データにする' },
+      freeeデータ化サービス: { label: 'Tech Lead', sub: '紙の証憑の仕訳データ化' },
       freee顧問先管理: { label: 'EM / Tech Lead', sub: '税理士向けサービスの作り直し' },
       従業員ポータル: { label: 'EM / Tech Lead', sub: '従業員向けアプリの立ち上げ' },
       人事労務統合基盤: { label: 'Architect', sub: '人事労務基盤のサービス分割' },
@@ -107,7 +107,7 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       },
       {
         title: 'Launching web applications',
-        body: 'With Claude Code at the center of development, I take a product from idea to release in short cycles. I keep launching personal products on Hono, React, and Cloudflare Workers.',
+        body: 'With Claude Code at the center of development, I take a product from idea to release in short cycles. I continue to launch personal products on Hono, React, and Cloudflare Workers.',
       },
     ],
     traceHint: 'Open a row to see the role in detail and the technologies used.',
