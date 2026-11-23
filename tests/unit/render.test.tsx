@@ -100,12 +100,24 @@ test('軸は支援技術に読ませない', () => {
   expect(ja).toContain('<div class="axis" aria-hidden="true">');
 });
 
-test('ヒーローのXのリンクはアイコンだけで、名前はaria-labelで伝える', () => {
-  const xLink = /<a class="social"[^>]*href="https:\/\/x\.com\/paveg_"[^>]*>([\s\S]*?)<\/a>/.exec(
-    ja,
-  );
-  expect(xLink?.[0]).toContain('aria-label="X"');
-  expect(xLink?.[1]?.replace(/<svg[\s\S]*?<\/svg>/g, '')).toBe('');
+test('ヒーローのGitHub・X・LinkedInのリンクはアイコンだけで、名前はaria-labelで伝える', () => {
+  const expected = [
+    ['GitHub', 'https://github.com/paveg'],
+    ['X', 'https://x.com/paveg_'],
+    ['LinkedIn', 'https://www.linkedin.com/in/xpav'],
+  ];
+  for (const html of [ja, en]) {
+    const hero = html.slice(html.indexOf('class="hero"'), html.indexOf('</header>'));
+    const links = [
+      ...hero.matchAll(/<a class="icon-link" href="([^"]+)" aria-label="([^"]+)">([\s\S]*?)<\/a>/g),
+    ];
+    expect(links.map(([, href, label]) => [label, href])).toEqual(expected);
+    expect(links.map(([, , , body]) => body?.replace(/<svg[\s\S]*?<\/svg>/g, ''))).toEqual([
+      '',
+      '',
+      '',
+    ]);
+  }
 });
 
 test('フッターのソースへのリンクはGitHubのアイコンとリポジトリのパスを出す', () => {

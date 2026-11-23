@@ -155,6 +155,34 @@ test('トレースの行はTabで届き、Enterで開きSpaceで閉じ、フォ�
   await expect(row).not.toHaveAttribute('open');
 });
 
+test('ヒーローのリンクにフォーカスが当たると、本文色の線が出て、角の丸みは変わらない', async ({
+  page,
+}) => {
+  await page.goto('/');
+  const inkColor = await page.evaluate(() => getComputedStyle(document.body).color);
+  const links = page.locator('.contact-row a');
+  for (let index = 0; index < (await links.count()); index++) {
+    const link = links.nth(index);
+    const radiusBefore = await link.evaluate((el) => getComputedStyle(el).borderRadius);
+    await link.focus();
+    const focused = await link.evaluate((el) => {
+      const { outlineStyle, outlineColor, borderRadius } = getComputedStyle(el);
+      return {
+        outlineStyle,
+        outlineColor,
+        borderRadius,
+        isFocusVisible: el.matches(':focus-visible'),
+      };
+    });
+    expect(focused).toEqual({
+      outlineStyle: 'solid',
+      outlineColor: inkColor,
+      borderRadius: radiusBefore,
+      isFocusVisible: true,
+    });
+  }
+});
+
 test('横スクロールが出ない', async ({ browser }) => {
   const page = await (
     await browser.newContext({ viewport: { width: 360, height: 800 } })
