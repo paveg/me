@@ -73,3 +73,10 @@ export const buildHead = (locale: Locale): string => {
     ),
   ].join('\n    ');
 };
+
+export const buildNotFoundHead = (): string =>
+  [
+    `<title>404 | ${getContent('ja').profile.profile.name}</title>`,
+    `<meta name="robots" content="noindex">`,
+    `<link rel="icon" href="${PROFILE_IMAGE}" type="image/jpeg">`,
+  ].join('\n    ');

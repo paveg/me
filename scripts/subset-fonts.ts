@@ -4,7 +4,9 @@ import subsetFont from 'subset-font';
 import { missingCharacters, readCodepoints } from './lib/cmap';
 
 const clientDir = resolve('dist/client');
-const pagePaths = [resolve(clientDir, 'index.html'), resolve(clientDir, 'en/index.html')];
+const pagePaths = ['index.html', 'en/index.html', '404.html'].map((path) =>
+  resolve(clientDir, path),
+);
 const weights = [
   { weight: 400, source: resolve('fonts/src/LINESeedJP-Regular.ttf') },
   { weight: 700, source: resolve('fonts/src/LINESeedJP-Bold.ttf') },

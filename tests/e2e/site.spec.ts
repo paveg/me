@@ -296,3 +296,20 @@ for (const path of ['/', '/en/']) {
     }
   });
 }
+
+test('存在しないURLでは、サイトの見た目の404ページを返す', async ({ browser }) => {
+  const page = await (
+    await browser.newContext({ colorScheme: 'dark', viewport: { width: 390, height: 844 } })
+  ).newPage();
+  const response = await page.goto('/en/no-such-page');
+  expect(response?.status()).toBe(404);
+  const look = await page.evaluate(() => ({
+    background: getComputedStyle(document.body).backgroundColor,
+    font: getComputedStyle(document.body).fontFamily,
+  }));
+  expect(look.background).not.toBe('rgba(0, 0, 0, 0)');
+  expect(look.font).toContain('LINE Seed JP');
+  await expect(page.getByRole('link', { name: 'トップへ戻る' })).toHaveAttribute('href', '/');
+  await expect(page.getByRole('link', { name: /English/ })).toHaveAttribute('href', '/en/');
+  expect(await listSmallTapTargets(page)).toEqual([]);
+});
