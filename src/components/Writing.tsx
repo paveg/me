@@ -1,6 +1,6 @@
 import { BLOG_URL, type SiteCopy } from '../data/site';
 
-export function Writing({ copy }: { copy: SiteCopy }) {
+export const Writing = ({ copy }: { copy: SiteCopy }) => {
   return (
     <section id="writing">
       <h2>Writing &amp; Talks</h2>
@@ -20,4 +20,4 @@ export function Writing({ copy }: { copy: SiteCopy }) {
       </p>
     </section>
   );
-}
+};

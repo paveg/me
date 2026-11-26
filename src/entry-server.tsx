@@ -4,6 +4,6 @@ import { buildHead } from './head';
 
 export type Locale = 'ja' | 'en';
 
-export function render(locale: Locale): { html: string; head: string } {
+export const render = (locale: Locale): { html: string; head: string } => {
   return { html: renderToString(<App locale={locale} />), head: buildHead(locale) };
-}
+};

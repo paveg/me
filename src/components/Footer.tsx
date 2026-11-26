@@ -3,7 +3,7 @@ import { Icon } from './Icon';
 
 const GITHUB_ORIGIN = 'https://github.com/';
 
-export function Footer({ copy }: { copy: SiteCopy }) {
+export const Footer = ({ copy }: { copy: SiteCopy }) => {
   return (
     <footer>
       <div>
@@ -16,4 +16,4 @@ export function Footer({ copy }: { copy: SiteCopy }) {
       </a>
     </footer>
   );
-}
+};

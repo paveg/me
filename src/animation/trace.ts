@@ -14,16 +14,16 @@ interface Span {
 
 const clamp01 = (value: number) => Math.min(Math.max(value, 0), 1);
 
-function readSpans(root: HTMLElement): Span[] {
+const readSpans = (root: HTMLElement): Span[] => {
   return [...root.querySelectorAll<HTMLElement>('details.trace-row')].flatMap((row) => {
     const bar = row.querySelector<HTMLElement>('.bar');
     if (!bar) return [];
     const fades = [...row.querySelectorAll<HTMLElement>('.duration, .open-end')];
     return [{ bar, left: parseFloat(bar.style.left), width: parseFloat(bar.style.width), fades }];
   });
-}
+};
 
-function clearSpanStyles(spans: Span[]) {
+const clearSpanStyles = (spans: Span[]) => {
   for (const { bar, fades } of spans) {
     bar.style.transform = '';
     for (const el of fades) {
@@ -31,17 +31,17 @@ function clearSpanStyles(spans: Span[]) {
       el.style.transition = '';
     }
   }
-}
+};
 
-function clearToggleStyles(body: HTMLElement) {
+const clearToggleStyles = (body: HTMLElement) => {
   body.style.height = '';
   body.style.paddingTop = '';
   body.style.paddingBottom = '';
   body.style.opacity = '';
-}
+};
 
 // border-boxなので高さだけを0にしても上下のpaddingが残る。paddingも一緒に動かして途中の段差をなくす
-function animateToggle(body: HTMLElement, opening: boolean, onComplete: () => void) {
+const animateToggle = (body: HTMLElement, opening: boolean, onComplete: () => void) => {
   const { paddingTop, paddingBottom } = getComputedStyle(body);
   const shown = { height: body.offsetHeight, paddingTop, paddingBottom, opacity: 1 };
   const hidden = { height: 0, paddingTop: 0, paddingBottom: 0, opacity: 0 };
@@ -58,9 +58,9 @@ function animateToggle(body: HTMLElement, opening: boolean, onComplete: () => vo
       onComplete();
     },
   });
-}
+};
 
-function bindToggleAnimation(details: HTMLDetailsElement): () => void {
+const bindToggleAnimation = (details: HTMLDetailsElement): (() => void) => {
   const summary = details.querySelector('summary');
   const body = details.querySelector<HTMLElement>('.detail');
   if (!summary || !body) return () => {};
@@ -88,9 +88,9 @@ function bindToggleAnimation(details: HTMLDetailsElement): () => void {
     summary.removeEventListener('click', onClick);
     clearToggleStyles(body);
   };
-}
+};
 
-export function startTraceAnimation(root: HTMLElement): () => void {
+export const startTraceAnimation = (root: HTMLElement): (() => void) => {
   const scope = createScope({
     root,
     mediaQueries: { reduceMotion: '(prefers-reduced-motion)' },
@@ -158,4 +158,4 @@ export function startTraceAnimation(root: HTMLElement): () => void {
   });
 
   return () => scope.revert();
-}
+};

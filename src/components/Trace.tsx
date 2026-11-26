@@ -18,7 +18,7 @@ const TICK_STEP_YEARS = 2;
 
 type CustomProperties = CSSProperties & Record<`--${string}`, string>;
 
-function TraceDetail({ row, locale }: { row: TraceRow; locale: Locale }) {
+const TraceDetail = ({ row, locale }: { row: TraceRow; locale: Locale }) => {
   return (
     <div className="detail">
       <p className="meta">{row.role}</p>
@@ -49,9 +49,9 @@ function TraceDetail({ row, locale }: { row: TraceRow; locale: Locale }) {
       )}
     </div>
   );
-}
+};
 
-export function Trace({
+export const Trace = ({
   profile,
   copy,
   locale,
@@ -59,7 +59,7 @@ export function Trace({
   profile: PortfolioData;
   copy: SiteCopy;
   locale: Locale;
-}) {
+}) => {
   const axis = axisFor(__BUILD_MONTH__);
   const rows = buildTraceRows(profile, copy.traceLabels, __BUILD_MONTH__);
   const nowPercent = `${endPercent(__BUILD_MONTH__, axis).toFixed(2)}%`;
@@ -119,4 +119,4 @@ export function Trace({
       })}
     </section>
   );
-}
+};

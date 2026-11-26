@@ -11,9 +11,9 @@ const PROFILE_IMAGE_SIZE = 192;
 
 const OG_LOCALES: Record<Locale, string> = { ja: 'ja_JP', en: 'en_US' };
 
-export function pagePath(locale: Locale): '/' | '/en/' {
+export const pagePath = (locale: Locale): '/' | '/en/' => {
   return locale === 'ja' ? '/' : '/en/';
-}
+};
 
 const pageUrl = (locale: Locale) => `${SITE_URL}${pagePath(locale)}`;
 
@@ -27,7 +27,7 @@ const escapeHtml = (value: string) =>
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;');
 
-export function buildHead(locale: Locale): string {
+export const buildHead = (locale: Locale): string => {
   const { profile, copy } = getContent(locale);
   const otherLocale: Locale = locale === 'ja' ? 'en' : 'ja';
   const title = escapeHtml(`${profile.profile.name} — ${copy.title}`);
@@ -72,4 +72,4 @@ export function buildHead(locale: Locale): string {
         `<link rel="preload" as="font" type="font/woff2" href="/fonts/line-seed-jp-${weight}.woff2" crossorigin>`,
     ),
   ].join('\n    ');
-}
+};

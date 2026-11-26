@@ -5,14 +5,14 @@ import { siteCopy } from '../../src/data/site';
 const JA_ALNUM_SPACE =
   /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}ー、。] [A-Za-z0-9]|[A-Za-z0-9] [\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}、。]/u;
 
-function collectStrings(value: unknown): string[] {
+const collectStrings = (value: unknown): string[] => {
   if (typeof value === 'string') return [value];
   if (Array.isArray(value)) return value.flatMap(collectStrings);
   if (value !== null && typeof value === 'object') {
     return Object.values(value).flatMap(collectStrings);
   }
   return [];
-}
+};
 
 test('日本語の文面に、半角英数字の前後の空白がない', () => {
   const strings = [...collectStrings(getContent('ja').profile), ...collectStrings(siteCopy.ja)];

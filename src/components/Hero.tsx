@@ -18,7 +18,7 @@ const socialLinks = [
 
 const splitAfterCommas = (line: string) => line.split(/(?<=、)/);
 
-export function Hero({
+export const Hero = ({
   profile,
   copy,
   locale,
@@ -26,7 +26,7 @@ export function Hero({
   profile: Profile;
   copy: SiteCopy;
   locale: Locale;
-}) {
+}) => {
   return (
     <header className="hero">
       <nav className="lang" aria-label="Language">
@@ -72,4 +72,4 @@ export function Hero({
       </div>
     </header>
   );
-}
+};

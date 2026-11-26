@@ -5,11 +5,11 @@ import { expect, test } from 'vitest';
 // pnpm buildの後に実行する（build-output.test.tsと同じ）
 const BUDGET = { js: 46_000, css: 8_500, font: 102_000, image: 13_200 };
 
-function filesWithExtension(dir: string, extension: string): string[] {
+const filesWithExtension = (dir: string, extension: string): string[] => {
   return readdirSync(dir, { recursive: true, encoding: 'utf8' })
     .filter((path) => path.endsWith(extension))
     .map((path) => join(dir, path));
-}
+};
 
 const jsFiles = (dir: string) => filesWithExtension(dir, '.js');
 

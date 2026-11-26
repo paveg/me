@@ -1,4 +1,4 @@
-export function IconSprite() {
+export const IconSprite = () => {
   return (
     <svg className="sprite" width="0" height="0" aria-hidden="true">
       <symbol id="i-github" viewBox="0 0 16 16">
@@ -43,4 +43,4 @@ export function IconSprite() {
       </symbol>
     </svg>
   );
-}
+};

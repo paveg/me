@@ -3,7 +3,7 @@ const WINDOWS_PLATFORM = 3;
 const WINDOWS_UNICODE_BMP = 1;
 const WINDOWS_UNICODE_FULL = 10;
 
-function findTable(view: DataView, tag: string): number {
+const findTable = (view: DataView, tag: string): number => {
   const tableCount = view.getUint16(4);
   for (let index = 0; index < tableCount; index += 1) {
     const record = 12 + index * 16;
@@ -13,9 +13,9 @@ function findTable(view: DataView, tag: string): number {
     if (recordTag === tag) return view.getUint32(record + 8);
   }
   throw new Error(`フォントに${tag}テーブルがない`);
-}
+};
 
-function readFormat4(view: DataView, start: number, codepoints: Set<number>): void {
+const readFormat4 = (view: DataView, start: number, codepoints: Set<number>): void => {
   const segmentCount = view.getUint16(start + 6) / 2;
   const endCodes = start + 14;
   const startCodes = endCodes + segmentCount * 2 + 2;
@@ -36,9 +36,9 @@ function readFormat4(view: DataView, start: number, codepoints: Set<number>): vo
       if (glyphId !== 0) codepoints.add(codepoint);
     }
   }
-}
+};
 
-function readFormat12(view: DataView, start: number, codepoints: Set<number>): void {
+const readFormat12 = (view: DataView, start: number, codepoints: Set<number>): void => {
   const groupCount = view.getUint32(start + 12);
   for (let group = 0; group < groupCount; group += 1) {
     const record = start + 16 + group * 12;
@@ -49,9 +49,9 @@ function readFormat12(view: DataView, start: number, codepoints: Set<number>): v
       if (startGlyphId + (codepoint - startCode) !== 0) codepoints.add(codepoint);
     }
   }
-}
+};
 
-export function readCodepoints(ttf: Uint8Array): Set<number> {
+export const readCodepoints = (ttf: Uint8Array): Set<number> => {
   const view = new DataView(ttf.buffer, ttf.byteOffset, ttf.byteLength);
   const cmap = findTable(view, 'cmap');
   const subtableCount = view.getUint16(cmap + 2);
@@ -73,15 +73,15 @@ export function readCodepoints(ttf: Uint8Array): Set<number> {
     else if (format === 12) readFormat12(view, subtable, codepoints);
   }
   return codepoints;
-}
+};
 
 const NOT_RENDERED = /[\s\p{Cc}]/u;
 
-export function missingCharacters(text: string, codepoints: Set<number>): string[] {
+export const missingCharacters = (text: string, codepoints: Set<number>): string[] => {
   const missing = new Set<string>();
   for (const character of text) {
     if (NOT_RENDERED.test(character)) continue;
     if (!codepoints.has(character.codePointAt(0) ?? 0)) missing.add(character);
   }
   return [...missing];
-}
+};

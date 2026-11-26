@@ -9,7 +9,7 @@ import { Trace } from './components/Trace';
 import { Work } from './components/Work';
 import { Writing } from './components/Writing';
 
-export function App({ locale }: { locale: Locale }) {
+export const App = ({ locale }: { locale: Locale }) => {
   const { profile, copy } = getContent(locale);
   return (
     <>
@@ -25,4 +25,4 @@ export function App({ locale }: { locale: Locale }) {
       </main>
     </>
   );
-}
+};
