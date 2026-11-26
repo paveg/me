@@ -13,6 +13,11 @@ test('英語ページが/en/index.htmlにprerenderされている', () => {
   expect(html).toContain('Ryota Ikezawa</h1>');
 });
 
-test('404ページが出力されている', () => {
+test('404ページはサイトのCSSを読み、日英それぞれのトップへ戻れる', () => {
   expect(existsSync('dist/client/404.html')).toBe(true);
+  const html = readFileSync('dist/client/404.html', 'utf8');
+  expect(html).toMatch(/<link rel="stylesheet"[^>]*href="\/assets\/index-[\w-]+\.css"/);
+  expect(html).toContain('<meta name="robots" content="noindex">');
+  expect(html).toMatch(/<a href="\/"[^>]*>トップへ戻る<\/a>/);
+  expect(html).toMatch(/<div lang="en"[^>]*>[\s\S]*<a href="\/en\/"[^>]*>/);
 });

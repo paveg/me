@@ -104,6 +104,7 @@ summary:focus-visible {
 
 .name-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: clamp(1rem, 3vw, 1.75rem);
 }
@@ -244,18 +245,32 @@ summary:focus-visible {
   margin-left: var(--label-width);
 }
 
+/*
+ * 年の幅は「現在」の線まで、かつ、間引かれうる年（.minor）は次の目盛りまで、それ以外は2つ先の目盛りまで。
+ * 収まらない年は、前に置いたゼロ幅スペースで2行目へ折り返させて隠す
+ */
 .tick {
   position: absolute;
   top: 0;
-  bottom: 0;
+  left: var(--x);
+  width: min(calc(var(--grid-step) * 2), calc(var(--now) - var(--x)));
+  height: 1lh;
+  overflow: hidden;
   padding-left: 0.375rem;
+}
+
+.tick.minor {
+  width: min(var(--grid-step), calc(var(--now) - var(--x)));
+}
+
+.tick::before {
+  content: '\200b';
 }
 
 .now-label {
   position: absolute;
   top: 0;
-  transform: translateX(-100%);
-  padding-right: 0.375rem;
+  padding-left: 0.375rem;
   white-space: nowrap;
   color: var(--ink);
 }
@@ -285,7 +300,7 @@ summary:focus-visible {
 
 .trace summary {
   display: grid;
-  grid-template-columns: var(--label-width) 1fr;
+  grid-template-columns: var(--label-width) minmax(0, 1fr);
   align-items: center;
   min-height: 2.75rem;
   list-style: none;
@@ -336,13 +351,10 @@ details[open] > summary .caret {
 .label-text {
   flex: 1;
   min-width: 0;
-  display: grid;
-  grid-template-columns: 1fr auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
   column-gap: 0.75rem;
-}
-
-.role {
-  white-space: nowrap;
 }
 
 .parent .role,
@@ -358,7 +370,7 @@ details[open] > summary .caret {
 }
 
 .label small {
-  grid-column: 1 / -1;
+  flex-basis: 100%;
   font-size: 0.8125rem;
   color: var(--muted);
 }
@@ -482,6 +494,7 @@ h2 {
   display: grid;
   gap: 1.75rem;
   max-width: var(--measure);
+  overflow-wrap: anywhere;
 }
 
 .offer h3 {
@@ -500,7 +513,7 @@ h2 {
   padding: 0;
   margin: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(18rem, 100%), 1fr));
   gap: 1.5rem 3rem;
 }
 
@@ -520,8 +533,9 @@ h2 {
 
 .writing li {
   display: grid;
-  grid-template-columns: 4rem 1fr;
+  grid-template-columns: 4rem minmax(0, 1fr);
   gap: 1rem;
+  overflow-wrap: anywhere;
   padding: 1rem 0;
   border-bottom: 1px solid var(--rule);
 }
@@ -553,7 +567,7 @@ h2 {
 
 .contact dl > div {
   display: grid;
-  grid-template-columns: 6rem 1fr;
+  grid-template-columns: 6rem minmax(0, 1fr);
   gap: 0 1rem;
 }
 
@@ -563,6 +577,7 @@ h2 {
 
 .contact dd {
   margin: 0;
+  overflow-wrap: anywhere;
 }
 
 footer {
@@ -589,17 +604,20 @@ footer p {
   }
 }
 
-@media (max-width: 40rem) {
-  :root {
-    --label-width: 0rem;
-    --gutter: 4.5rem;
-  }
-
+/* 指で操作する端末では、幅に関係なくリンクのタップ領域を44px以上にする */
+@media (max-width: 40rem), (pointer: coarse) {
   a {
     display: inline-flex;
     align-items: center;
     min-height: 2.75rem;
     min-width: 2.75rem;
+  }
+}
+
+@media (max-width: 40rem) {
+  :root {
+    --label-width: 0rem;
+    --gutter: 4.5rem;
   }
 
   .page {
@@ -628,7 +646,7 @@ footer p {
   }
 
   .trace summary {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     padding: 0.25rem 0;
   }
 

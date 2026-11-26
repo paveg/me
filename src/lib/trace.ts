@@ -23,49 +23,49 @@ export type TraceRow = {
 
 const YEAR_MONTH = /^(\d{4})-(0[1-9]|1[0-2])$/;
 
-export function toYearFraction(ym: string): number {
+export const toYearFraction = (ym: string): number => {
   const match = YEAR_MONTH.exec(ym);
   if (!match) throw new Error(`Invalid period: ${ym}`);
   return Number(match[1]) + (Number(match[2]) - 1) / 12;
-}
+};
 
-export function axisFor(now: string): Axis {
+export const axisFor = (now: string): Axis => {
   return { start: 2015, end: Math.floor(toYearFraction(now)) + 1 };
-}
+};
 
-export function positionPercent(ym: string, axis: Axis): number {
+export const positionPercent = (ym: string, axis: Axis): number => {
   return ((toYearFraction(ym) - axis.start) / (axis.end - axis.start)) * 100;
-}
+};
 
-export function endPercent(ym: string, axis: Axis): number {
+export const endPercent = (ym: string, axis: Axis): number => {
   return ((toYearFraction(ym) + 1 / 12 - axis.start) / (axis.end - axis.start)) * 100;
-}
+};
 
-function toMonthCount(ym: string): number {
+const toMonthCount = (ym: string): number => {
   const match = YEAR_MONTH.exec(ym);
   if (!match) throw new Error(`Invalid period: ${ym}`);
   return Number(match[1]) * 12 + Number(match[2]);
-}
+};
 
-export function formatDuration(start: string, end: string | null, now: string): string {
+export const formatDuration = (start: string, end: string | null, now: string): string => {
   const months = toMonthCount(end ?? now) - toMonthCount(start) + 1;
   const years = Math.floor(months / 12);
   const rest = months % 12;
   return [years > 0 ? `${years}y` : '', rest > 0 ? `${rest}m` : ''].filter(Boolean).join(' ');
-}
+};
 
-function findLabel(labels: Record<string, TraceLabel>, key: string | undefined): TraceLabel {
+const findLabel = (labels: Record<string, TraceLabel>, key: string | undefined): TraceLabel => {
   const label = key === undefined ? undefined : labels[key];
   if (!label) throw new Error(`Missing trace label: ${key}`);
   return label;
-}
+};
 
 type RowSource = Pick<
   TraceRow,
   'key' | 'kind' | 'start' | 'end' | 'role' | 'description' | 'technologies' | 'links' | 'star'
 >;
 
-function toRow(source: RowSource, label: TraceLabel, now: string, axis: Axis): TraceRow {
+const toRow = (source: RowSource, label: TraceLabel, now: string, axis: Axis): TraceRow => {
   const left = positionPercent(source.start, axis);
   const right = endPercent(source.end ?? now, axis);
   return {
@@ -77,13 +77,13 @@ function toRow(source: RowSource, label: TraceLabel, now: string, axis: Axis): T
     duration: formatDuration(source.start, source.end, now),
     isOpen: source.end === null,
   };
-}
+};
 
-export function buildTraceRows(
+export const buildTraceRows = (
   data: PortfolioData,
   labels: Record<string, TraceLabel>,
   now: string,
-): TraceRow[] {
+): TraceRow[] => {
   const axis = axisFor(now);
   const rows: TraceRow[] = [];
   const oldestFirstCompanies = [...data.workExperience].sort((a, b) =>
@@ -132,14 +132,14 @@ export function buildTraceRows(
     }
   }
   return rows;
-}
+};
 
-export function formatPeriod(start: string, end: string | null, presentLabel: string): string {
+export const formatPeriod = (start: string, end: string | null, presentLabel: string): string => {
   return `${start.replace('-', '.')} – ${end === null ? presentLabel : end.replace('-', '.')}`;
-}
+};
 
-export function axisTicks(axis: Axis, step: number): number[] {
+export const axisTicks = (axis: Axis, step: number): number[] => {
   const ticks: number[] = [];
   for (let year = axis.start; year < axis.end; year += step) ticks.push(year);
   return ticks;
-}
+};

@@ -4,7 +4,9 @@ import subsetFont from 'subset-font';
 import { missingCharacters, readCodepoints } from './lib/cmap';
 
 const clientDir = resolve('dist/client');
-const pagePaths = [resolve(clientDir, 'index.html'), resolve(clientDir, 'en/index.html')];
+const pagePaths = ['index.html', 'en/index.html', '404.html'].map((path) =>
+  resolve(clientDir, path),
+);
 const weights = [
   { weight: 400, source: resolve('fonts/src/LINESeedJP-Regular.ttf') },
   { weight: 700, source: resolve('fonts/src/LINESeedJP-Bold.ttf') },
@@ -19,7 +21,7 @@ const NAMED_ENTITIES: Record<string, string> = {
   nbsp: ' ',
 };
 
-function decodeEntities(text: string): string {
+const decodeEntities = (text: string): string => {
   return text.replace(/&(#x[0-9a-f]+|#[0-9]+|[a-z]+);/gi, (entity, name: string) => {
     if (name.startsWith('#x') || name.startsWith('#X')) {
       return String.fromCodePoint(Number.parseInt(name.slice(2), 16));
@@ -29,16 +31,16 @@ function decodeEntities(text: string): string {
     if (decoded === undefined) throw new Error(`未対応のHTMLエンティティ: ${entity}`);
     return decoded;
   });
-}
+};
 
-function visibleText(html: string): string {
+const visibleText = (html: string): string => {
   const title = /<title>([\s\S]*?)<\/title>/.exec(html)?.[1] ?? '';
   const body = /<body[^>]*>([\s\S]*)<\/body>/.exec(html)?.[1] ?? '';
   const withoutNonText = body
     .replace(/<!--[\s\S]*?-->/g, '')
     .replace(/<(script|style)\b[\s\S]*?<\/\1>/gi, '');
   return decodeEntities(`${title}\n${withoutNonText.replace(/<[^>]*>/g, '\n')}`);
-}
+};
 
 const text = pagePaths.map((path) => visibleText(readFileSync(path, 'utf8'))).join('\n');
 

@@ -2,7 +2,7 @@ import type { Locale } from '../entry-server';
 import type { Project } from '../data/types';
 import { joinLines } from '../lib/text';
 
-export function Work({ projects, locale }: { projects: Project[]; locale: Locale }) {
+export const Work = ({ projects, locale }: { projects: Project[]; locale: Locale }) => {
   return (
     <section id="work">
       <h2>Work</h2>
@@ -16,4 +16,4 @@ export function Work({ projects, locale }: { projects: Project[]; locale: Locale
       </ul>
     </section>
   );
-}
+};

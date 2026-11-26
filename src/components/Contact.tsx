@@ -15,7 +15,7 @@ const entries = [
   },
 ] as const;
 
-export function Contact() {
+export const Contact = () => {
   return (
     <section id="contact" className="contact">
       <h2>Contact</h2>
@@ -34,4 +34,4 @@ export function Contact() {
       </dl>
     </section>
   );
-}
+};

@@ -9,10 +9,10 @@ const profiles: Record<Locale, PortfolioData> = {
   en: enProfile as PortfolioData,
 };
 
-export function getContent(locale: Locale): { profile: PortfolioData; copy: SiteCopy } {
+export const getContent = (locale: Locale): { profile: PortfolioData; copy: SiteCopy } => {
   const profile = profiles[locale];
   return {
     profile: { ...profile, projects: profile.projects.filter((p) => p.name !== 'Attain') },
     copy: siteCopy[locale],
   };
-}
+};

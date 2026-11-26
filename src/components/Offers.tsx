@@ -1,6 +1,6 @@
 import type { SiteCopy } from '../data/site';
 
-export function Offers({ copy }: { copy: SiteCopy }) {
+export const Offers = ({ copy }: { copy: SiteCopy }) => {
   return (
     <section id="offers">
       <h2>{copy.ui.offersHeading}</h2>
@@ -14,4 +14,4 @@ export function Offers({ copy }: { copy: SiteCopy }) {
       </ul>
     </section>
   );
-}
+};

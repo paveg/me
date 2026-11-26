@@ -4,6 +4,15 @@ const PLAYHEAD_DELAY_MS = 300;
 const PLAYHEAD_DURATION_MS = 2600;
 const FADE_DURATION_MS = 300;
 const TOGGLE_DURATION_MS = 420;
+// JSが届く前に、完成した経歴がこれより長く見えていたら、消して描き直さない
+const INTRO_SKIP_AFTER_PAINT_MS = 250;
+
+const shownLongBeforeScript = () => {
+  const firstPaint = performance.getEntriesByName('first-contentful-paint')[0];
+  return (
+    firstPaint !== undefined && performance.now() - firstPaint.startTime > INTRO_SKIP_AFTER_PAINT_MS
+  );
+};
 
 interface Span {
   bar: HTMLElement;
@@ -14,16 +23,16 @@ interface Span {
 
 const clamp01 = (value: number) => Math.min(Math.max(value, 0), 1);
 
-function readSpans(root: HTMLElement): Span[] {
+const readSpans = (root: HTMLElement): Span[] => {
   return [...root.querySelectorAll<HTMLElement>('details.trace-row')].flatMap((row) => {
     const bar = row.querySelector<HTMLElement>('.bar');
     if (!bar) return [];
     const fades = [...row.querySelectorAll<HTMLElement>('.duration, .open-end')];
     return [{ bar, left: parseFloat(bar.style.left), width: parseFloat(bar.style.width), fades }];
   });
-}
+};
 
-function clearSpanStyles(spans: Span[]) {
+const clearSpanStyles = (spans: Span[]) => {
   for (const { bar, fades } of spans) {
     bar.style.transform = '';
     for (const el of fades) {
@@ -31,17 +40,17 @@ function clearSpanStyles(spans: Span[]) {
       el.style.transition = '';
     }
   }
-}
+};
 
-function clearToggleStyles(body: HTMLElement) {
+const clearToggleStyles = (body: HTMLElement) => {
   body.style.height = '';
   body.style.paddingTop = '';
   body.style.paddingBottom = '';
   body.style.opacity = '';
-}
+};
 
 // border-boxなので高さだけを0にしても上下のpaddingが残る。paddingも一緒に動かして途中の段差をなくす
-function animateToggle(body: HTMLElement, opening: boolean, onComplete: () => void) {
+const animateToggle = (body: HTMLElement, opening: boolean, onComplete: () => void) => {
   const { paddingTop, paddingBottom } = getComputedStyle(body);
   const shown = { height: body.offsetHeight, paddingTop, paddingBottom, opacity: 1 };
   const hidden = { height: 0, paddingTop: 0, paddingBottom: 0, opacity: 0 };
@@ -58,9 +67,9 @@ function animateToggle(body: HTMLElement, opening: boolean, onComplete: () => vo
       onComplete();
     },
   });
-}
+};
 
-function bindToggleAnimation(details: HTMLDetailsElement): () => void {
+const bindToggleAnimation = (details: HTMLDetailsElement): (() => void) => {
   const summary = details.querySelector('summary');
   const body = details.querySelector<HTMLElement>('.detail');
   if (!summary || !body) return () => {};
@@ -88,16 +97,16 @@ function bindToggleAnimation(details: HTMLDetailsElement): () => void {
     summary.removeEventListener('click', onClick);
     clearToggleStyles(body);
   };
-}
+};
 
-export function startTraceAnimation(root: HTMLElement): () => void {
+export const startTraceAnimation = (root: HTMLElement): (() => void) => {
   const scope = createScope({
     root,
     mediaQueries: { reduceMotion: '(prefers-reduced-motion)' },
   });
 
   scope.add((self) => {
-    if (self?.matches.reduceMotion) return;
+    if (self?.matches.reduceMotion || shownLongBeforeScript()) return;
 
     const spans = readSpans(root);
     const axis = root.querySelector<HTMLElement>('.ticks');
@@ -158,4 +167,4 @@ export function startTraceAnimation(root: HTMLElement): () => void {
   });
 
   return () => scope.revert();
-}
+};

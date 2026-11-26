@@ -8,7 +8,7 @@ type EntryServer = typeof import('../src/entry-server');
 const clientDir = resolve('dist/client');
 const serverEntry = resolve('dist/server/entry-server.js');
 
-const { render } = (await import(pathToFileURL(serverEntry).href)) as EntryServer;
+const { render, renderNotFound } = (await import(pathToFileURL(serverEntry).href)) as EntryServer;
 const template = readFileSync(resolve(clientDir, 'index.html'), 'utf8');
 
 const outputPaths: Record<Locale, string> = {
@@ -26,3 +26,13 @@ for (const locale of Object.keys(outputPaths) as Locale[]) {
   mkdirSync(dirname(outputPath), { recursive: true });
   writeFileSync(outputPath, page);
 }
+
+// 404はwrangler.jsonのnot_found_handlingで、/en/以下も含む全ての存在しないURLに返る
+const notFound = renderNotFound();
+writeFileSync(
+  resolve(clientDir, '404.html'),
+  template
+    .replace('%LANG%', 'ja')
+    .replace('<!--app-head-->', notFound.head)
+    .replace('<!--app-html-->', notFound.html),
+);
