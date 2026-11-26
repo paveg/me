@@ -4,6 +4,15 @@ const PLAYHEAD_DELAY_MS = 300;
 const PLAYHEAD_DURATION_MS = 2600;
 const FADE_DURATION_MS = 300;
 const TOGGLE_DURATION_MS = 420;
+// JSが届く前に、完成した経歴がこれより長く見えていたら、消して描き直さない
+const INTRO_SKIP_AFTER_PAINT_MS = 250;
+
+const shownLongBeforeScript = () => {
+  const firstPaint = performance.getEntriesByName('first-contentful-paint')[0];
+  return (
+    firstPaint !== undefined && performance.now() - firstPaint.startTime > INTRO_SKIP_AFTER_PAINT_MS
+  );
+};
 
 interface Span {
   bar: HTMLElement;
@@ -97,7 +106,7 @@ export const startTraceAnimation = (root: HTMLElement): (() => void) => {
   });
 
   scope.add((self) => {
-    if (self?.matches.reduceMotion) return;
+    if (self?.matches.reduceMotion || shownLongBeforeScript()) return;
 
     const spans = readSpans(root);
     const axis = root.querySelector<HTMLElement>('.ticks');

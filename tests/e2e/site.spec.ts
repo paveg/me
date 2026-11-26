@@ -54,6 +54,22 @@ test('reduced-motionでなければアニメーションが走る', async ({ pag
   await expect(page.locator('.playhead')).toHaveCount(1);
 });
 
+test('JSの到着が遅れたら、表示済みの経歴を消して描き直さない', async ({ page }) => {
+  await page.route('**/assets/*.js', async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    await route.continue();
+  });
+  await page.goto('/');
+  await page.waitForTimeout(CLIENT_MODULE_SETTLE_MS);
+  for (let i = 0; i < 5; i++) {
+    expect((await readBarTransforms(page)).every(isIdentity)).toBe(true);
+    await page.waitForTimeout(100);
+  }
+  const row = page.locator('details.trace-row').first();
+  await row.locator('summary').click();
+  await expect(row).toHaveAttribute('open', '');
+});
+
 test('アニメーション後、バーは最終状態に落ち着く', async ({ page }) => {
   await page.goto('/');
   await expect.poll(() => countAnimatedInlineStyles(page), { timeout: 5000 }).toBeGreaterThan(0);
