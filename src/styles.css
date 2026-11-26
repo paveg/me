@@ -604,17 +604,20 @@ footer p {
   }
 }
 
-@media (max-width: 40rem) {
-  :root {
-    --label-width: 0rem;
-    --gutter: 4.5rem;
-  }
-
+/* 指で操作する端末では、幅に関係なくリンクのタップ領域を44px以上にする */
+@media (max-width: 40rem), (pointer: coarse) {
   a {
     display: inline-flex;
     align-items: center;
     min-height: 2.75rem;
     min-width: 2.75rem;
+  }
+}
+
+@media (max-width: 40rem) {
+  :root {
+    --label-width: 0rem;
+    --gutter: 4.5rem;
   }
 
   .page {

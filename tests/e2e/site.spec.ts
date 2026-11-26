@@ -108,17 +108,32 @@ for (const path of ['/', '/en/']) {
   });
 }
 
+const listSmallTapTargets = (page: Page) =>
+  page
+    .locator('a, button, summary')
+    .evaluateAll((els) =>
+      els.filter((el) => el.getBoundingClientRect().height < 44).map((el) => el.textContent),
+    );
+
+// 幅が40remを超えても、指で操作する端末ではタップ領域を44px以上にする
+for (const [name, viewport] of [
+  ['iPhoneの横向き', { width: 844, height: 390 }],
+  ['iPad miniの縦向き', { width: 768, height: 1024 }],
+] as const) {
+  test(`${name}でもリンクとボタンのタップ領域が44px以上`, async ({ browser }) => {
+    const page = await (await browser.newContext({ viewport, hasTouch: true })).newPage();
+    await page.goto('/');
+    expect(await page.evaluate(() => matchMedia('(pointer: coarse)').matches)).toBe(true);
+    expect(await listSmallTapTargets(page)).toEqual([]);
+  });
+}
+
 test('モバイルでリンクとボタンのタップ領域が44px以上、文字は13px以上', async ({ browser }) => {
   const page = await (
     await browser.newContext({ viewport: { width: 390, height: 844 } })
   ).newPage();
   await page.goto('/');
-  const small = await page
-    .locator('a, button, summary')
-    .evaluateAll((els) =>
-      els.filter((el) => el.getBoundingClientRect().height < 44).map((el) => el.textContent),
-    );
-  expect(small).toEqual([]);
+  expect(await listSmallTapTargets(page)).toEqual([]);
   const tinyText = await page
     .locator('body *')
     .evaluateAll((els) =>
