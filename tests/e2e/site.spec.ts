@@ -228,3 +228,40 @@ for (const path of ['/', '/en/']) {
     }
   });
 }
+
+// ブラウザの文字サイズ「大」(20px) と「特大」(24px) を、ルートの文字サイズで再現する
+const ROOT_FONT_SIZES = ['100%', '125%', '150%'];
+
+for (const path of ['/', '/en/']) {
+  test(`${path}: 狭い画面や大きい文字でも横にはみ出さず、経歴の行が軸とそろう`, async ({
+    browser,
+  }) => {
+    const page = await (await browser.newContext({ reducedMotion: 'reduce' })).newPage();
+    await page.goto(path);
+    for (const fontSize of ROOT_FONT_SIZES) {
+      const style = await page.addStyleTag({ content: `html { font-size: ${fontSize} }` });
+      for (const width of [320, 360, 375, 390, 430]) {
+        await page.setViewportSize({ width, height: 800 });
+        const layout = await page.evaluate(() => {
+          const axis = document.querySelector('.ticks')!.getBoundingClientRect();
+          const misaligned = [...document.querySelectorAll('.trace-row')].flatMap((row) => {
+            const track = row.querySelector('.track')!.getBoundingClientRect();
+            const off = Math.max(
+              Math.abs(track.left - axis.left),
+              Math.abs(track.right - axis.right),
+            );
+            return off > 0.5
+              ? [`${row.querySelector('.role')?.textContent} ${Math.round(off)}px`]
+              : [];
+          });
+          return { scrollWidth: document.documentElement.scrollWidth, misaligned };
+        });
+        expect(layout, `font ${fontSize}, width ${width}`).toEqual({
+          scrollWidth: width,
+          misaligned: [],
+        });
+      }
+      await style.evaluate((el) => (el as HTMLElement).remove());
+    }
+  });
+}
