@@ -191,41 +191,40 @@ test('横スクロールが出ない', async ({ browser }) => {
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(360);
 });
 
-const AXIS_WIDTHS = [320, 360, 390, 430, 640, 700, 800, 1024, 1280];
+const AXIS_WIDTHS = [320, 360, 390, 430, 640, 641, 667, 700, 741, 760, 800, 1024, 1280];
 
 for (const path of ['/', '/en/']) {
-  test(`${path}: 経歴の目盛りの年と「現在」がどの幅でも重ならない`, async ({ browser }) => {
+  test(`${path}: 経歴の目盛りの年と「現在」がどの幅でも欠けず重ならない`, async ({ browser }) => {
     const page = await (await browser.newContext({ reducedMotion: 'reduce' })).newPage();
     await page.goto(path);
     for (const width of AXIS_WIDTHS) {
       await page.setViewportSize({ width, height: 800 });
-      const overlaps = await page.locator('.axis').evaluate((axis) => {
-        const visibleTextRects = [...axis.querySelectorAll('.tick, .now-label')].flatMap((el) => {
+      const problems = await page.locator('.axis').evaluate((axis) => {
+        // 折り返して枠の下に出た年は隠れている。枠からはみ出して一部だけ見える年は欠けている
+        const labels = [...axis.querySelectorAll('.tick, .now-label')].flatMap((el) => {
           if (getComputedStyle(el).display === 'none') return [];
           const box = el.getBoundingClientRect();
           const range = document.createRange();
           range.selectNodeContents(el);
           const text = range.getBoundingClientRect();
-          const clipped =
-            text.left < box.left - 0.5 ||
-            text.right > box.right + 0.5 ||
-            text.bottom > box.bottom + 0.5;
-          return clipped ? [] : [{ label: el.textContent, left: text.left, right: text.right }];
+          if (text.top >= box.bottom - 0.5) return [];
+          const cut = text.left < box.left - 0.5 || text.right > box.right + 0.5;
+          return [{ label: el.textContent ?? '', left: text.left, right: text.right, cut }];
         });
-        return visibleTextRects
-          .flatMap((a, i) =>
-            visibleTextRects
+        const years = labels.filter((l) => /^\d{4}$/.test(l.label));
+        return [
+          ...labels.filter((l) => l.cut).map((l) => `${l.label} cut`),
+          ...labels.flatMap((a, i) =>
+            labels
               .slice(i + 1)
               .filter((b) => a.left < b.right && b.left < a.right)
               .map((b) => `${a.label}/${b.label}`),
-          )
-          .concat(
-            visibleTextRects.some((r) => r.label === 'Now' || r.label === '現在')
-              ? []
-              : ['now-label hidden'],
-          );
+          ),
+          ...(labels.some((l) => l.label === 'Now' || l.label === '現在') ? [] : ['now hidden']),
+          ...(years.length >= 2 ? [] : [`only ${years.length} years visible`]),
+        ];
       });
-      expect(overlaps, `width ${width}`).toEqual([]);
+      expect(problems, `width ${width}`).toEqual([]);
     }
   });
 }
