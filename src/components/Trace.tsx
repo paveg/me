@@ -75,7 +75,9 @@ export function Trace({
             <span
               key={year}
               className={index % 2 === 1 ? 'tick minor' : 'tick'}
-              style={{ left: `${positionPercent(`${year}-01`, axis)}%` }}
+              style={
+                { '--x': `${positionPercent(`${year}-01`, axis).toFixed(2)}%` } as CustomProperties
+              }
             >
               {year}
             </span>

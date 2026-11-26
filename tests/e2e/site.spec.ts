@@ -190,3 +190,42 @@ test('横スクロールが出ない', async ({ browser }) => {
   await page.goto('/');
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(360);
 });
+
+const AXIS_WIDTHS = [320, 360, 390, 430, 640, 700, 800, 1024, 1280];
+
+for (const path of ['/', '/en/']) {
+  test(`${path}: 経歴の目盛りの年と「現在」がどの幅でも重ならない`, async ({ browser }) => {
+    const page = await (await browser.newContext({ reducedMotion: 'reduce' })).newPage();
+    await page.goto(path);
+    for (const width of AXIS_WIDTHS) {
+      await page.setViewportSize({ width, height: 800 });
+      const overlaps = await page.locator('.axis').evaluate((axis) => {
+        const visibleTextRects = [...axis.querySelectorAll('.tick, .now-label')].flatMap((el) => {
+          if (getComputedStyle(el).display === 'none') return [];
+          const box = el.getBoundingClientRect();
+          const range = document.createRange();
+          range.selectNodeContents(el);
+          const text = range.getBoundingClientRect();
+          const clipped =
+            text.left < box.left - 0.5 ||
+            text.right > box.right + 0.5 ||
+            text.bottom > box.bottom + 0.5;
+          return clipped ? [] : [{ label: el.textContent, left: text.left, right: text.right }];
+        });
+        return visibleTextRects
+          .flatMap((a, i) =>
+            visibleTextRects
+              .slice(i + 1)
+              .filter((b) => a.left < b.right && b.left < a.right)
+              .map((b) => `${a.label}/${b.label}`),
+          )
+          .concat(
+            visibleTextRects.some((r) => r.label === 'Now' || r.label === '現在')
+              ? []
+              : ['now-label hidden'],
+          );
+      });
+      expect(overlaps, `width ${width}`).toEqual([]);
+    }
+  });
+}
