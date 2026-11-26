@@ -1,4 +1,5 @@
 import { getContent } from './data';
+import { BLOG_URL, contacts } from './data/site';
 import type { Locale } from './entry-server';
 
 export const SITE_URL = 'https://me.funailog.com';
@@ -16,6 +17,9 @@ export function pagePath(locale: Locale): '/' | '/en/' {
 
 const pageUrl = (locale: Locale) => `${SITE_URL}${pagePath(locale)}`;
 
+// </script> で閉じられないよう、<をエスケープしてから埋め込む
+const toJsonLd = (value: object) => JSON.stringify(value).replaceAll('<', '\\u003c');
+
 const escapeHtml = (value: string) =>
   value
     .replaceAll('&', '&amp;')
@@ -29,6 +33,19 @@ export function buildHead(locale: Locale): string {
   const title = escapeHtml(`${profile.profile.name} — ${copy.title}`);
   const description = escapeHtml(copy.pitch.join(locale === 'ja' ? '' : ' '));
   const url = pageUrl(locale);
+  const currentEmployer = profile.workExperience.find((work) => work.period.end === null);
+  const person = {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name: profile.profile.name,
+    jobTitle: copy.title,
+    url,
+    image: `${SITE_URL}${PROFILE_IMAGE}`,
+    sameAs: [contacts.github, contacts.x, contacts.linkedin, BLOG_URL],
+    ...(currentEmployer && {
+      worksFor: { '@type': 'Organization', name: currentEmployer.company },
+    }),
+  };
 
   return [
     `<title>${title}</title>`,
@@ -49,6 +66,7 @@ export function buildHead(locale: Locale): string {
     `<meta name="twitter:card" content="summary">`,
     `<link rel="icon" href="${PROFILE_IMAGE}" type="image/jpeg">`,
     `<link rel="apple-touch-icon" href="${PROFILE_IMAGE}">`,
+    `<script type="application/ld+json">${toJsonLd(person)}</script>`,
     ...FONT_WEIGHTS.map(
       (weight) =>
         `<link rel="preload" as="font" type="font/woff2" href="/fonts/line-seed-jp-${weight}.woff2" crossorigin>`,

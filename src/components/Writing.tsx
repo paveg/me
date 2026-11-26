@@ -1,6 +1,4 @@
-import type { SiteCopy } from '../data/site';
-
-const FUNAILOG_URL = 'https://funailog.com';
+import { BLOG_URL, type SiteCopy } from '../data/site';
 
 export function Writing({ copy }: { copy: SiteCopy }) {
   return (
@@ -18,7 +16,7 @@ export function Writing({ copy }: { copy: SiteCopy }) {
         ))}
       </ol>
       <p className="more">
-        <a href={FUNAILOG_URL}>{copy.moreWritingLabel}</a>
+        <a href={BLOG_URL}>{copy.moreWritingLabel}</a>
       </p>
     </section>
   );

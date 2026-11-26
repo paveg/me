@@ -26,6 +26,8 @@ export const contacts = {
   linkedin: 'https://www.linkedin.com/in/xpav',
 } as const;
 
+export const BLOG_URL = 'https://funailog.com';
+
 const sourceUrl = 'https://github.com/paveg/me';
 
 export const siteCopy: Record<Locale, SiteCopy> = {
