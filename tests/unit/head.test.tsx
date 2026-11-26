@@ -23,3 +23,14 @@ test('言語切替は末尾スラッシュ付きのパスを指す', () => {
   expect(renderToString(<App locale="ja" />)).toContain('href="/en/"');
   expect(renderToString(<App locale="en" />)).toContain('href="/"');
 });
+
+test('共有時の画像とfaviconはプロフィール画像を絶対URLで指す', () => {
+  for (const locale of ['ja', 'en'] as const) {
+    const head = buildHead(locale);
+    expect(head).toContain(
+      '<meta property="og:image" content="https://me.funailog.com/profile.jpg">',
+    );
+    expect(head).toContain('<link rel="icon" href="/profile.jpg" type="image/jpeg">');
+    expect(head).toContain('<link rel="apple-touch-icon" href="/profile.jpg">');
+  }
+});

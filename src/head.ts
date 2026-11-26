@@ -5,6 +5,9 @@ export const SITE_URL = 'https://me.funailog.com';
 
 const FONT_WEIGHTS = [400, 700];
 
+const PROFILE_IMAGE = '/profile.jpg';
+const PROFILE_IMAGE_SIZE = 192;
+
 const OG_LOCALES: Record<Locale, string> = { ja: 'ja_JP', en: 'en_US' };
 
 export function pagePath(locale: Locale): '/' | '/en/' {
@@ -40,7 +43,12 @@ export function buildHead(locale: Locale): string {
     `<meta property="og:url" content="${url}">`,
     `<meta property="og:locale" content="${OG_LOCALES[locale]}">`,
     `<meta property="og:locale:alternate" content="${OG_LOCALES[otherLocale]}">`,
+    `<meta property="og:image" content="${SITE_URL}${PROFILE_IMAGE}">`,
+    `<meta property="og:image:width" content="${PROFILE_IMAGE_SIZE}">`,
+    `<meta property="og:image:height" content="${PROFILE_IMAGE_SIZE}">`,
     `<meta name="twitter:card" content="summary">`,
+    `<link rel="icon" href="${PROFILE_IMAGE}" type="image/jpeg">`,
+    `<link rel="apple-touch-icon" href="${PROFILE_IMAGE}">`,
     ...FONT_WEIGHTS.map(
       (weight) =>
         `<link rel="preload" as="font" type="font/woff2" href="/fonts/line-seed-jp-${weight}.woff2" crossorigin>`,
